@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Meu Blog Retrô</title>
+
+  <!-- Fonte pixel -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: black;
+      color: #00ff00;
+      font-family: 'Press Start 2P', monospace;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .window {
+      border: 4px solid #00ff00;
+      padding: 20px;
+      box-shadow: 5px 5px #003300;
+      max-width: 800px;
+      margin: auto;
+      background: #000;
+    }
+
+    h1 {
+      font-size: 16px;
+      border-bottom: 2px dashed #00ff00;
+      padding-bottom: 10px;
+    }
+
+    .post {
+      margin-top: 20px;
+      padding: 10px;
+      border: 2px solid #00ff00;
+    }
+
+    .post-title {
+      font-size: 12px;
+      margin-bottom: 10px;
+      color: #00ff00;
+    }
+
+    .post-date {
+      font-size: 8px;
+      color: #007700;
+      margin-bottom: 10px;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      background: #00ff00;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0% { opacity: 1; }
+      50% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    a {
+      color: #00ff00;
+      text-decoration: underline;
+    }
+
+    a:hover {
+      background: #00ff00;
+      color: black;
+    }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 8px;
+      color: #007700;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="window">
+    <h1>> BLOG.EXE <span class="cursor"></span></h1>
+
+    <div class="post">
+      <div class="post-title">> Primeiro Post</div>
+      <div class="post-date">[12/04/2026]</div>
+      <p>Esse é meu blog com estética de computador antigo. Bem-vindo ao sistema.</p>
+    </div>
+
+    <div class="post">
+      <div class="post-title">> Segundo Post</div>
+      <div class="post-date">[11/04/2026]</div>
+      <p>Interface inspirada em terminais antigos, pixel art e nostalgia digital.</p>
+    </div>
+
+    <div class="footer">
+      <p>© 1998-2026 // sistema operacional fictício</p>
+    </div>
+  </div>
+
+</body>
+</html>
