@@ -5,181 +5,346 @@
 <title>Seven OS</title>
 
 <style>
+* { box-sizing: border-box; }
+
 body {
   margin: 0;
-  font-family: monospace;
-  background: black;
-  color: #00ff9f;
-}
-
-/* LOGIN */
-#login {
-  position: fixed;
-  width: 100%;
+  font-family: "Segoe UI", monospace;
+  background: radial-gradient(circle at top, #0f1722, #05070a);
+  color: #d1d5db;
   height: 100vh;
-  background: black;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-}
-
-#login input {
-  background: black;
-  border: 1px solid #00ff9f;
-  color: #00ff9f;
-  padding: 10px;
+  overflow: hidden;
 }
 
 /* DESKTOP */
-#desktop {
-  display: none;
-  height: 100vh;
+.desktop {
+  height: calc(100vh - 48px);
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 90px);
+  gap: 14px;
 }
 
-/* Ícones */
+/* ICONES */
 .icon {
-  margin: 20px;
-  cursor: pointer;
+  text-align: center;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: default;
+  transition: 0.15s;
 }
 
-/* Terminal */
-.window {
-  position: absolute;
-  width: 500px;
-  height: 300px;
-  background: black;
-  border: 1px solid #00ff9f;
-  display: none;
-  flex-direction: column;
+.icon:hover {
+  background: rgba(255,255,255,0.05);
 }
 
-.title {
-  background: #001f14;
-  padding: 5px;
-  display: flex;
-  justify-content: space-between;
-  cursor: move;
+.icon span {
+  font-size: 30px;
+  filter: drop-shadow(0 0 4px rgba(0,255,150,0.2));
 }
 
-.terminal {
-  flex: 1;
-  padding: 10px;
-  overflow-y: auto;
+.icon.active {
+  background: rgba(0,255,150,0.15);
 }
 
-input.cmd {
-  width: 100%;
-  background: black;
-  border: none;
-  color: #00ff9f;
-}
-
-/* Barra */
+/* TASKBAR */
 .taskbar {
+  height: 48px;
+  background: rgba(10,15,20,0.8);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
   position: fixed;
   bottom: 0;
   width: 100%;
-  background: #001f14;
-  padding: 5px;
+}
+
+.start {
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+}
+
+.start:hover {
+  background: rgba(0,255,150,0.1);
+}
+
+.search {
+  margin-left: 10px;
+  background: rgba(255,255,255,0.05);
+  border: none;
+  padding: 6px 12px;
+  border-radius: 20px;
+  color: white;
+  width: 200px;
+}
+
+.apps {
+  display: flex;
+  gap: 8px;
+  margin-left: 20px;
+}
+
+.task {
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.task.active {
+  background: rgba(0,255,150,0.15);
+}
+
+.clock {
+  margin-left: auto;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* MENU */
+.menu {
+  position: fixed;
+  bottom: 55px;
+  left: 10px;
+  width: 260px;
+  background: rgba(15,20,25,0.95);
+  border: 1px solid rgba(0,255,150,0.1);
+  border-radius: 10px;
+  display: none;
+  padding: 10px;
+}
+
+.menu div {
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.menu div:hover {
+  background: rgba(0,255,150,0.1);
+}
+
+/* WINDOW */
+.window {
+  position: absolute;
+  width: 520px;
+  height: 360px;
+  background: rgba(10,15,20,0.95);
+  border: 1px solid rgba(0,255,150,0.1);
+  border-radius: 8px;
+  display: none;
+  flex-direction: column;
+  box-shadow: 0 0 40px rgba(0,0,0,0.8);
+  transition: 0.15s;
+}
+
+.window.active {
+  box-shadow: 0 0 60px rgba(0,255,150,0.15);
+  z-index: 999;
+}
+
+/* TITLEBAR */
+.titlebar {
+  height: 32px;
+  background: rgba(20,30,35,0.9);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  cursor: move;
+  font-size: 13px;
+}
+
+/* BOTÕES */
+.controls span {
+  margin-left: 10px;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.controls span:hover {
+  opacity: 1;
+}
+
+/* CONTEÚDO */
+.content {
+  flex: 1;
+  padding: 12px;
+  overflow: auto;
+}
+
+/* POSTS */
+.post {
+  background: rgba(255,255,255,0.04);
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  transition: 0.15s;
+}
+
+.post:hover {
+  background: rgba(0,255,150,0.08);
+}
+
+/* NOTAS */
+textarea {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  color: #e5e7eb;
+  outline: none;
+}
+
+/* MAX */
+.max {
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: calc(100vh - 48px) !important;
+  border-radius: 0;
 }
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
-<div id="login">
-  <h2>Seven OS</h2>
-  <input type="password" id="pass" placeholder="senha">
-</div>
+<div class="desktop">
 
-<!-- DESKTOP -->
-<div id="desktop">
-
-  <div class="icon" onclick="openWin()">🖥️ Terminal</div>
-
-  <div class="window" id="term" style="top:100px; left:100px;">
-    <div class="title">
-      Terminal
-      <span onclick="closeWin()">X</span>
-    </div>
-
-    <div class="terminal" id="output"></div>
-
-    <input class="cmd" id="cmd" autofocus>
+  <div class="icon" ondblclick="openApp('blog')">
+    <span>📰</span><br>log
   </div>
 
-  <div class="taskbar">Seven OS - conectado</div>
+  <div class="icon" ondblclick="openApp('notes')">
+    <span>✎</span><br>notes
+  </div>
 
+</div>
+
+<div class="menu" id="menu">
+  <div onclick="openApp('blog')">📰 log</div>
+  <div onclick="openApp('notes')">✎ notes</div>
+</div>
+
+<!-- BLOG -->
+<div class="window" id="blog" style="top:90px; left:120px;">
+  <div class="titlebar">
+    log.exe
+    <div class="controls">
+      <span onclick="minimize('blog')">—</span>
+      <span onclick="maximize('blog')">⬜</span>
+      <span onclick="closeApp('blog')">✕</span>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="post">
+      <h3>fragmento 01</h3>
+      <p>não começa com escolha. começa com reação.</p>
+    </div>
+
+    <div class="post">
+      <h3>fragmento 02</h3>
+      <p>construir algo do zero ainda é estranho.</p>
+    </div>
+  </div>
+</div>
+
+<!-- NOTAS -->
+<div class="window" id="notes" style="top:130px; left:220px;">
+  <div class="titlebar">
+    notes.exe
+    <div class="controls">
+      <span onclick="minimize('notes')">—</span>
+      <span onclick="maximize('notes')">⬜</span>
+      <span onclick="closeApp('notes')">✕</span>
+    </div>
+  </div>
+
+  <div class="content">
+    <textarea id="txt"></textarea>
+  </div>
+</div>
+
+<div class="taskbar">
+  <div class="start" onclick="toggleMenu()">◼</div>
+  <input class="search" placeholder="search">
+  <div class="apps" id="apps"></div>
+  <div class="clock" id="clock"></div>
 </div>
 
 <script>
 
-// LOGIN
-document.getElementById("pass").addEventListener("keydown", e=>{
-  if(e.key==="Enter"){
-    document.getElementById("login").style.display="none";
-    document.getElementById("desktop").style.display="block";
-  }
-});
+// relógio
+setInterval(()=>{
+  let d=new Date();
+  clock.innerText=d.toLocaleTimeString().slice(0,5);
+},1000);
 
-// abrir
-function openWin(){
-  term.style.display="flex";
+// abrir app
+function openApp(id){
+  let w=document.getElementById(id);
+  w.style.display="flex";
+  focus(w);
+
+  if(!document.getElementById("task-"+id)){
+    let t=document.createElement("div");
+    t.className="task active";
+    t.id="task-"+id;
+    t.innerText="▣";
+    t.onclick=()=>toggleWin(id);
+    apps.appendChild(t);
+  }
 }
 
-// fechar
-function closeWin(){
-  term.style.display="none";
+// foco
+function focus(win){
+  document.querySelectorAll(".window").forEach(w=>w.classList.remove("active"));
+  win.classList.add("active");
 }
 
-// TERMINAL
-let output = document.getElementById("output");
-let input = document.getElementById("cmd");
+// ações
+function closeApp(id){ document.getElementById(id).style.display="none"; }
+function minimize(id){ document.getElementById(id).style.display="none"; }
+function maximize(id){ document.getElementById(id).classList.toggle("max"); }
+function toggleWin(id){
+  let w=document.getElementById(id);
+  w.style.display = w.style.display==="none"?"flex":"none";
+}
 
-input.addEventListener("keydown", e=>{
-  if(e.key==="Enter"){
-    let cmd = input.value;
-    output.innerHTML += "<div>> "+cmd+"</div>";
+// menu
+function toggleMenu(){
+  menu.style.display = menu.style.display==="block"?"none":"block";
+}
 
-    if(cmd==="help"){
-      output.innerHTML += "comandos: help, clear, about<br>";
-    }
-    else if(cmd==="clear"){
-      output.innerHTML="";
-    }
-    else if(cmd==="about"){
-      output.innerHTML += "Seven OS v1<br>";
-    }
-    else{
-      output.innerHTML += "comando não reconhecido<br>";
-    }
+// drag
+document.querySelectorAll(".window").forEach(win=>{
+  let bar=win.querySelector(".titlebar");
+  let is=false,x,y;
 
-    input.value="";
-    output.scrollTop = output.scrollHeight;
-  }
+  bar.onmousedown=e=>{
+    focus(win);
+    is=true;
+    x=e.clientX-win.offsetLeft;
+    y=e.clientY-win.offsetTop;
+  };
+
+  document.onmouseup=()=>is=false;
+
+  document.onmousemove=e=>{
+    if(is && !win.classList.contains("max")){
+      win.style.left=e.clientX-x+"px";
+      win.style.top=e.clientY-y+"px";
+    }
+  };
 });
 
-// arrastar
-let win = document.getElementById("term");
-let bar = win.querySelector(".title");
-let is=false,x,y;
+// salvar notas
+let t=document.getElementById("txt");
+t.value=localStorage.getItem("seven")||"";
+t.oninput=()=>localStorage.setItem("seven",t.value);
 
-bar.onmousedown=e=>{
-  is=true;
-  x=e.clientX-win.offsetLeft;
-  y=e.clientY-win.offsetTop;
-};
-
-document.onmouseup=()=>is=false;
-
-document.onmousemove=e=>{
-  if(is){
-    win.style.left=e.clientX-x+"px";
-    win.style.top=e.clientY-y+"px";
-  }
-};
 </script>
 
 </body>
