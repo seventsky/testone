@@ -5,226 +5,157 @@
 <title>Seven OS</title>
 
 <style>
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  font-family: "Segoe UI", monospace;
-  background: radial-gradient(circle at top, #0f1722, #05070a);
-  color: #d1d5db;
-  height: 100vh;
-  overflow: hidden;
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:"Segoe UI", monospace;
+  background:radial-gradient(circle at top,#0f1722,#05070a);
+  color:#d1d5db;
+  overflow:hidden;
 }
 
 /* DESKTOP */
-.desktop {
-  height: calc(100vh - 48px);
-  padding: 20px;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, 90px);
-  gap: 14px;
+.desktop{
+  height:calc(100vh - 48px);
+  padding:20px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,90px);
+  gap:14px;
 }
 
 /* ICONES */
-.icon {
-  text-align: center;
-  padding: 6px;
-  border-radius: 6px;
-  cursor: default;
-  transition: 0.15s;
+.icon{
+  text-align:center;
+  padding:6px;
+  border-radius:6px;
+  cursor:default;
 }
-
-.icon:hover {
-  background: rgba(255,255,255,0.05);
-}
-
-.icon span {
-  font-size: 30px;
-  filter: drop-shadow(0 0 4px rgba(0,255,150,0.2));
-}
-
-.icon.active {
-  background: rgba(0,255,150,0.15);
-}
+.icon:hover{background:rgba(255,255,255,0.05)}
+.icon span{font-size:30px}
 
 /* TASKBAR */
-.taskbar {
-  height: 48px;
-  background: rgba(10,15,20,0.8);
-  backdrop-filter: blur(12px);
-  display: flex;
-  align-items: center;
-  padding: 0 10px;
-  position: fixed;
-  bottom: 0;
-  width: 100%;
+.taskbar{
+  height:48px;
+  background:rgba(10,15,20,0.8);
+  backdrop-filter:blur(12px);
+  display:flex;
+  align-items:center;
+  padding:0 10px;
+  position:fixed;
+  bottom:0;
+  width:100%;
 }
 
-.start {
-  cursor: pointer;
-  padding: 6px;
-  border-radius: 4px;
+.start{cursor:pointer;padding:6px}
+.start:hover{background:rgba(0,255,150,0.1)}
+
+.search{
+  margin-left:10px;
+  background:rgba(255,255,255,0.05);
+  border:none;
+  padding:6px 12px;
+  border-radius:20px;
+  color:white;
 }
 
-.start:hover {
-  background: rgba(0,255,150,0.1);
-}
+.apps{display:flex;gap:8px;margin-left:20px}
+.task{padding:6px;border-radius:4px;cursor:pointer}
+.task.active{background:rgba(0,255,150,0.2)}
 
-.search {
-  margin-left: 10px;
-  background: rgba(255,255,255,0.05);
-  border: none;
-  padding: 6px 12px;
-  border-radius: 20px;
-  color: white;
-  width: 200px;
-}
-
-.apps {
-  display: flex;
-  gap: 8px;
-  margin-left: 20px;
-}
-
-.task {
-  padding: 6px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.task.active {
-  background: rgba(0,255,150,0.15);
-}
-
-.clock {
-  margin-left: auto;
-  font-size: 12px;
-  opacity: 0.7;
-}
+.clock{margin-left:auto;font-size:12px}
 
 /* MENU */
-.menu {
-  position: fixed;
-  bottom: 55px;
-  left: 10px;
-  width: 260px;
-  background: rgba(15,20,25,0.95);
-  border: 1px solid rgba(0,255,150,0.1);
-  border-radius: 10px;
-  display: none;
-  padding: 10px;
+.menu{
+  position:fixed;
+  bottom:55px;
+  left:10px;
+  width:240px;
+  background:#111;
+  border-radius:10px;
+  display:none;
+  padding:10px;
+}
+.menu div{padding:8px;border-radius:6px;cursor:pointer}
+.menu div:hover{background:rgba(0,255,150,0.1)}
+
+/* JANELAS */
+.window{
+  position:absolute;
+  width:520px;
+  height:360px;
+  background:#0b0f14;
+  border:1px solid rgba(0,255,150,0.1);
+  border-radius:8px;
+  display:none;
+  flex-direction:column;
 }
 
-.menu div {
-  padding: 8px;
-  border-radius: 6px;
-  cursor: pointer;
+.window.active{z-index:999}
+
+.titlebar{
+  height:32px;
+  background:#111;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 10px;
+  cursor:move;
 }
 
-.menu div:hover {
-  background: rgba(0,255,150,0.1);
-}
+.controls span{margin-left:10px;cursor:pointer}
 
-/* WINDOW */
-.window {
-  position: absolute;
-  width: 520px;
-  height: 360px;
-  background: rgba(10,15,20,0.95);
-  border: 1px solid rgba(0,255,150,0.1);
-  border-radius: 8px;
-  display: none;
-  flex-direction: column;
-  box-shadow: 0 0 40px rgba(0,0,0,0.8);
-  transition: 0.15s;
-}
-
-.window.active {
-  box-shadow: 0 0 60px rgba(0,255,150,0.15);
-  z-index: 999;
-}
-
-/* TITLEBAR */
-.titlebar {
-  height: 32px;
-  background: rgba(20,30,35,0.9);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 10px;
-  cursor: move;
-  font-size: 13px;
-}
-
-/* BOTÕES */
-.controls span {
-  margin-left: 10px;
-  cursor: pointer;
-  opacity: 0.7;
-}
-
-.controls span:hover {
-  opacity: 1;
-}
-
-/* CONTEÚDO */
-.content {
-  flex: 1;
-  padding: 12px;
-  overflow: auto;
+.content{
+  flex:1;
+  padding:10px;
+  overflow:auto;
 }
 
 /* POSTS */
-.post {
-  background: rgba(255,255,255,0.04);
-  padding: 10px;
-  border-radius: 6px;
-  margin-bottom: 10px;
-  transition: 0.15s;
+.post{
+  background:#111;
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:6px;
 }
 
-.post:hover {
-  background: rgba(0,255,150,0.08);
+/* TERMINAL */
+.terminal-output{
+  font-size:13px;
+  line-height:1.4;
 }
-
-/* NOTAS */
-textarea {
-  width: 100%;
-  height: 100%;
-  background: transparent;
-  border: none;
-  color: #e5e7eb;
-  outline: none;
+.terminal-input{
+  border:none;
+  background:transparent;
+  color:#00ff9f;
+  width:100%;
+  outline:none;
 }
 
 /* MAX */
-.max {
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: calc(100vh - 48px) !important;
-  border-radius: 0;
+.max{
+  top:0!important;
+  left:0!important;
+  width:100%!important;
+  height:calc(100vh - 48px)!important;
+  border-radius:0;
 }
 </style>
 </head>
 
 <body>
 
+<!-- DESKTOP -->
 <div class="desktop">
-
-  <div class="icon" ondblclick="openApp('blog')">
-    <span>📰</span><br>log
-  </div>
-
-  <div class="icon" ondblclick="openApp('notes')">
-    <span>✎</span><br>notes
-  </div>
-
+  <div class="icon" ondblclick="openApp('blog')"><span>📰</span><br>log</div>
+  <div class="icon" ondblclick="openApp('notes')"><span>✎</span><br>notes</div>
+  <div class="icon" ondblclick="openApp('terminal')"><span>⌨</span><br>terminal</div>
 </div>
 
+<!-- MENU -->
 <div class="menu" id="menu">
   <div onclick="openApp('blog')">📰 log</div>
   <div onclick="openApp('notes')">✎ notes</div>
+  <div onclick="openApp('terminal')">⌨ terminal</div>
 </div>
 
 <!-- BLOG -->
@@ -237,22 +168,14 @@ textarea {
       <span onclick="closeApp('blog')">✕</span>
     </div>
   </div>
-
   <div class="content">
-    <div class="post">
-      <h3>fragmento 01</h3>
-      <p>não começa com escolha. começa com reação.</p>
-    </div>
-
-    <div class="post">
-      <h3>fragmento 02</h3>
-      <p>construir algo do zero ainda é estranho.</p>
-    </div>
+    <div class="post"><h3>fragmento 01</h3><p>não começa com escolha.</p></div>
+    <div class="post"><h3>fragmento 02</h3><p>o controle é uma ilusão confortável.</p></div>
   </div>
 </div>
 
-<!-- NOTAS -->
-<div class="window" id="notes" style="top:130px; left:220px;">
+<!-- NOTES -->
+<div class="window" id="notes" style="top:130px; left:200px;">
   <div class="titlebar">
     notes.exe
     <div class="controls">
@@ -261,12 +184,26 @@ textarea {
       <span onclick="closeApp('notes')">✕</span>
     </div>
   </div>
-
   <div class="content">
-    <textarea id="txt"></textarea>
+    <textarea id="txt" style="width:100%;height:100%;background:transparent;color:white;border:none;"></textarea>
   </div>
 </div>
 
+<!-- TERMINAL -->
+<div class="window" id="terminal" style="top:100px; left:260px;">
+  <div class="titlebar">
+    terminal.exe
+    <div class="controls">
+      <span onclick="minimize('terminal')">—</span>
+      <span onclick="maximize('terminal')">⬜</span>
+      <span onclick="closeApp('terminal')">✕</span>
+    </div>
+  </div>
+  <div class="content terminal-output" id="termOut"></div>
+  <input class="terminal-input" id="termIn" placeholder="type command...">
+</div>
+
+<!-- TASKBAR -->
 <div class="taskbar">
   <div class="start" onclick="toggleMenu()">◼</div>
   <input class="search" placeholder="search">
@@ -276,13 +213,12 @@ textarea {
 
 <script>
 
-// relógio
+/* CLOCK */
 setInterval(()=>{
-  let d=new Date();
-  clock.innerText=d.toLocaleTimeString().slice(0,5);
+  clock.innerText=new Date().toLocaleTimeString().slice(0,5);
 },1000);
 
-// abrir app
+/* APPS */
 function openApp(id){
   let w=document.getElementById(id);
   w.style.display="flex";
@@ -298,27 +234,26 @@ function openApp(id){
   }
 }
 
-// foco
+function closeApp(id){document.getElementById(id).style.display="none";}
+function minimize(id){document.getElementById(id).style.display="none";}
+function maximize(id){document.getElementById(id).classList.toggle("max");}
+
+function toggleWin(id){
+  let w=document.getElementById(id);
+  w.style.display=w.style.display==="none"?"flex":"none";
+}
+
 function focus(win){
   document.querySelectorAll(".window").forEach(w=>w.classList.remove("active"));
   win.classList.add("active");
 }
 
-// ações
-function closeApp(id){ document.getElementById(id).style.display="none"; }
-function minimize(id){ document.getElementById(id).style.display="none"; }
-function maximize(id){ document.getElementById(id).classList.toggle("max"); }
-function toggleWin(id){
-  let w=document.getElementById(id);
-  w.style.display = w.style.display==="none"?"flex":"none";
-}
-
-// menu
+/* MENU */
 function toggleMenu(){
-  menu.style.display = menu.style.display==="block"?"none":"block";
+  menu.style.display=menu.style.display==="block"?"none":"block";
 }
 
-// drag
+/* DRAG */
 document.querySelectorAll(".window").forEach(win=>{
   let bar=win.querySelector(".titlebar");
   let is=false,x,y;
@@ -340,10 +275,55 @@ document.querySelectorAll(".window").forEach(win=>{
   };
 });
 
-// salvar notas
+/* NOTES SAVE */
 let t=document.getElementById("txt");
 t.value=localStorage.getItem("seven")||"";
 t.oninput=()=>localStorage.setItem("seven",t.value);
+
+/* TERMINAL */
+let out=document.getElementById("termOut");
+let input=document.getElementById("termIn");
+
+const files=["notes","log"];
+
+input.addEventListener("keydown",e=>{
+  if(e.key==="Enter"){
+    let cmd=input.value.trim();
+    print("> "+cmd);
+
+    if(cmd==="help"){
+      print("help | ls | open [app] | whoami | clear | scan");
+    }
+    else if(cmd==="whoami"){
+      print("seven@local");
+    }
+    else if(cmd==="ls"){
+      files.forEach(f=>print(f));
+    }
+    else if(cmd.startsWith("open")){
+      let f=cmd.split(" ")[1];
+      if(files.includes(f)) openApp(f==="log"?"blog":f);
+      else print("not found");
+    }
+    else if(cmd==="scan"){
+      print("scanning...");
+      setTimeout(()=>print("no threats found"),800);
+    }
+    else if(cmd==="clear"){
+      out.innerHTML="";
+    }
+    else{
+      print("unknown command");
+    }
+
+    input.value="";
+  }
+});
+
+function print(t){
+  out.innerHTML+="<div>"+t+"</div>";
+  out.scrollTop=out.scrollHeight;
+}
 
 </script>
 
