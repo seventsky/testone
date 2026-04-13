@@ -2,160 +2,185 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven Blog</title>
+<title>Seven OS</title>
 
 <style>
 body {
   margin: 0;
-  font-family: 'Courier New', monospace;
-  background: #0d0d0d;
-  color: #eaeaea;
+  font-family: monospace;
+  background: black;
+  color: #00ff9f;
 }
 
-/* Header */
-header {
-  background: #111;
-  padding: 20px;
-  text-align: center;
-  border-bottom: 1px solid #333;
-}
-
-header h1 {
-  margin: 0;
-  font-size: 28px;
-}
-
-header p {
-  font-size: 14px;
-  color: #aaa;
-}
-
-/* Layout */
-.container {
+/* LOGIN */
+#login {
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+  background: black;
   display: flex;
-  max-width: 1100px;
-  margin: auto;
-  padding: 20px;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 
-/* Posts */
-.posts {
-  flex: 3;
+#login input {
+  background: black;
+  border: 1px solid #00ff9f;
+  color: #00ff9f;
+  padding: 10px;
 }
 
-.post {
-  background: #161616;
-  padding: 15px;
-  margin-bottom: 20px;
-  border-radius: 10px;
-  transition: 0.2s;
+/* DESKTOP */
+#desktop {
+  display: none;
+  height: 100vh;
 }
 
-.post:hover {
-  transform: scale(1.01);
+/* Ícones */
+.icon {
+  margin: 20px;
+  cursor: pointer;
 }
 
-.post h2 {
-  margin-top: 0;
+/* Terminal */
+.window {
+  position: absolute;
+  width: 500px;
+  height: 300px;
+  background: black;
+  border: 1px solid #00ff9f;
+  display: none;
+  flex-direction: column;
 }
 
-.post small {
-  color: #888;
+.title {
+  background: #001f14;
+  padding: 5px;
+  display: flex;
+  justify-content: space-between;
+  cursor: move;
 }
 
-/* Sidebar */
-.sidebar {
+.terminal {
   flex: 1;
-  margin-left: 20px;
+  padding: 10px;
+  overflow-y: auto;
 }
 
-.card {
-  background: #161616;
-  padding: 15px;
-  margin-bottom: 20px;
-  border-radius: 10px;
+input.cmd {
+  width: 100%;
+  background: black;
+  border: none;
+  color: #00ff9f;
 }
 
-/* Footer */
-footer {
-  text-align: center;
-  padding: 20px;
-  border-top: 1px solid #333;
-  color: #777;
+/* Barra */
+.taskbar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #001f14;
+  padding: 5px;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  <h1>Seven</h1>
-  <p>fragmentos, pensamentos e códigos</p>
-</header>
+<!-- LOGIN -->
+<div id="login">
+  <h2>Seven OS</h2>
+  <input type="password" id="pass" placeholder="senha">
+</div>
 
-<div class="container">
+<!-- DESKTOP -->
+<div id="desktop">
 
-  <!-- POSTS -->
-  <div class="posts">
+  <div class="icon" onclick="openWin()">🖥️ Terminal</div>
 
-    <div class="post">
-      <h2>Uma Cientista Que Não Sabe Amar</h2>
-      <small>13 abril 2026</small>
-      <p>
-        Amar talvez nunca tenha sido uma escolha no início. São respostas químicas,
-        impulsos e padrões que se repetem. Mas o que sobra depois que tudo desacelera?
-        Talvez seja aí que começa a dúvida.
-      </p>
+  <div class="window" id="term" style="top:100px; left:100px;">
+    <div class="title">
+      Terminal
+      <span onclick="closeWin()">X</span>
     </div>
 
-    <div class="post">
-      <h2>Sobre Começar do Zero</h2>
-      <small>12 abril 2026</small>
-      <p>
-        Construir algo do nada é estranho. Você encara o vazio e decide que aquilo
-        vai virar alguma coisa. Mesmo sem saber exatamente o quê.
-      </p>
-    </div>
+    <div class="terminal" id="output"></div>
 
-    <div class="post">
-      <h2>Primeiro Projeto</h2>
-      <small>10 abril 2026</small>
-      <p>
-        Hoje subi meu primeiro site. Simples, mas funcional. Talvez seja só o começo,
-        mas já parece mais real do que só pensar.
-      </p>
-    </div>
-
+    <input class="cmd" id="cmd" autofocus>
   </div>
 
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-
-    <div class="card">
-      <h3>Sobre</h3>
-      <p>
-        Explorando ideias, código e tudo que existe entre lógica e sentimento.
-      </p>
-    </div>
-
-    <div class="card">
-      <h3>Projetos</h3>
-      <p>🖥️ Mini sistema web</p>
-      <p>📓 Blog pessoal</p>
-    </div>
-
-    <div class="card">
-      <h3>Contato</h3>
-      <p>📧 seuemail@email.com</p>
-    </div>
-
-  </div>
+  <div class="taskbar">Seven OS - conectado</div>
 
 </div>
 
-<footer>
-  © 2026 — Seven
-</footer>
+<script>
+
+// LOGIN
+document.getElementById("pass").addEventListener("keydown", e=>{
+  if(e.key==="Enter"){
+    document.getElementById("login").style.display="none";
+    document.getElementById("desktop").style.display="block";
+  }
+});
+
+// abrir
+function openWin(){
+  term.style.display="flex";
+}
+
+// fechar
+function closeWin(){
+  term.style.display="none";
+}
+
+// TERMINAL
+let output = document.getElementById("output");
+let input = document.getElementById("cmd");
+
+input.addEventListener("keydown", e=>{
+  if(e.key==="Enter"){
+    let cmd = input.value;
+    output.innerHTML += "<div>> "+cmd+"</div>";
+
+    if(cmd==="help"){
+      output.innerHTML += "comandos: help, clear, about<br>";
+    }
+    else if(cmd==="clear"){
+      output.innerHTML="";
+    }
+    else if(cmd==="about"){
+      output.innerHTML += "Seven OS v1<br>";
+    }
+    else{
+      output.innerHTML += "comando não reconhecido<br>";
+    }
+
+    input.value="";
+    output.scrollTop = output.scrollHeight;
+  }
+});
+
+// arrastar
+let win = document.getElementById("term");
+let bar = win.querySelector(".title");
+let is=false,x,y;
+
+bar.onmousedown=e=>{
+  is=true;
+  x=e.clientX-win.offsetLeft;
+  y=e.clientY-win.offsetTop;
+};
+
+document.onmouseup=()=>is=false;
+
+document.onmousemove=e=>{
+  if(is){
+    win.style.left=e.clientX-x+"px";
+    win.style.top=e.clientY-y+"px";
+  }
+};
+</script>
 
 </body>
 </html>
