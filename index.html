@@ -2,259 +2,160 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Desktop</title>
+<title>Seven Blog</title>
 
 <style>
 body {
   margin: 0;
-  font-family: Arial;
-  background: linear-gradient(#0a0a0a, #1a1a1a);
-  height: 100vh;
-  overflow: hidden;
-  color: white;
+  font-family: 'Courier New', monospace;
+  background: #0d0d0d;
+  color: #eaeaea;
 }
 
-/* Desktop */
-.desktop {
+/* Header */
+header {
+  background: #111;
   padding: 20px;
-  display: grid;
-  grid-template-columns: repeat(6, 80px);
-  gap: 20px;
+  text-align: center;
+  border-bottom: 1px solid #333;
 }
-.icon { text-align: center; cursor: pointer; }
-.icon span { font-size: 32px; }
-.icon p { font-size: 12px; }
 
-/* Barra */
-.taskbar {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  height: 50px;
-  background: rgba(20,20,20,0.95);
+header h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+header p {
+  font-size: 14px;
+  color: #aaa;
+}
+
+/* Layout */
+.container {
   display: flex;
-  align-items: center;
-  padding: 0 10px;
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
 }
 
-.start-btn { cursor: pointer; font-size: 20px; }
-
-.search {
-  margin-left: 10px;
-  background: #2a2a2a;
-  border-radius: 20px;
-  padding: 5px 10px;
-  border: none;
-  color: white;
+/* Posts */
+.posts {
+  flex: 3;
 }
 
-.task-icons {
-  display: flex;
-  gap: 10px;
-  margin-left: 15px;
-}
-
-.task-icons span {
-  cursor: pointer;
-}
-
-.clock { margin-left: auto; }
-
-/* Menu iniciar */
-.start-menu {
-  position: fixed;
-  bottom: 60px;
-  left: 10px;
-  width: 220px;
-  background: #1e1e1e;
-  padding: 10px;
-  display: none;
+.post {
+  background: #161616;
+  padding: 15px;
+  margin-bottom: 20px;
   border-radius: 10px;
-}
-.start-menu div {
-  padding: 8px;
-  cursor: pointer;
-}
-.start-menu div:hover {
-  background: #333;
+  transition: 0.2s;
 }
 
-/* Janelas */
-.window {
-  position: absolute;
-  width: 320px;
-  height: 260px;
-  background: #1e1e1e;
-  border-radius: 10px;
-  display: none;
-  flex-direction: column;
-  animation: abrir 0.2s ease;
+.post:hover {
+  transform: scale(1.01);
 }
 
-@keyframes abrir {
-  from { transform: scale(0.8); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+.post h2 {
+  margin-top: 0;
 }
 
-.title-bar {
-  background: #333;
-  padding: 5px;
-  display: flex;
-  justify-content: space-between;
-  cursor: move;
+.post small {
+  color: #888;
 }
 
-.close { cursor: pointer; }
-
-/* Conteúdo */
-.content {
+/* Sidebar */
+.sidebar {
   flex: 1;
-  padding: 10px;
+  margin-left: 20px;
 }
 
-/* Bloco de notas */
-textarea {
-  width: 100%;
-  height: 100%;
-  background: black;
-  color: white;
-  border: none;
-  resize: none;
+.card {
+  background: #161616;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 20px;
+  border-top: 1px solid #333;
+  color: #777;
 }
 </style>
 </head>
 
 <body>
 
-<!-- Desktop -->
-<div class="desktop">
-  <div class="icon" onclick="abrir('notas')">
-    <span>📝</span><p>Notas</p>
+<header>
+  <h1>Seven</h1>
+  <p>fragmentos, pensamentos e códigos</p>
+</header>
+
+<div class="container">
+
+  <!-- POSTS -->
+  <div class="posts">
+
+    <div class="post">
+      <h2>Uma Cientista Que Não Sabe Amar</h2>
+      <small>13 abril 2026</small>
+      <p>
+        Amar talvez nunca tenha sido uma escolha no início. São respostas químicas,
+        impulsos e padrões que se repetem. Mas o que sobra depois que tudo desacelera?
+        Talvez seja aí que começa a dúvida.
+      </p>
+    </div>
+
+    <div class="post">
+      <h2>Sobre Começar do Zero</h2>
+      <small>12 abril 2026</small>
+      <p>
+        Construir algo do nada é estranho. Você encara o vazio e decide que aquilo
+        vai virar alguma coisa. Mesmo sem saber exatamente o quê.
+      </p>
+    </div>
+
+    <div class="post">
+      <h2>Primeiro Projeto</h2>
+      <small>10 abril 2026</small>
+      <p>
+        Hoje subi meu primeiro site. Simples, mas funcional. Talvez seja só o começo,
+        mas já parece mais real do que só pensar.
+      </p>
+    </div>
+
   </div>
 
-  <div class="icon" onclick="abrir('browser')">
-    <span>🌐</span><p>Navegador</p>
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <div class="card">
+      <h3>Sobre</h3>
+      <p>
+        Explorando ideias, código e tudo que existe entre lógica e sentimento.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Projetos</h3>
+      <p>🖥️ Mini sistema web</p>
+      <p>📓 Blog pessoal</p>
+    </div>
+
+    <div class="card">
+      <h3>Contato</h3>
+      <p>📧 seuemail@email.com</p>
+    </div>
+
   </div>
 
-  <div class="icon" onclick="abrir('files')">
-    <span>📁</span><p>Arquivos</p>
-  </div>
 </div>
 
-<!-- Menu iniciar -->
-<div class="start-menu" id="menu">
-  <div onclick="abrir('notas')">📝 Notas</div>
-  <div onclick="abrir('browser')">🌐 Navegador</div>
-  <div onclick="abrir('files')">📁 Arquivos</div>
-</div>
-
-<!-- Janelas -->
-
-<div class="window" id="notas" style="top:100px; left:100px;">
-  <div class="title-bar">
-    <span>📝 Bloco de Notas</span>
-    <span class="close" onclick="fechar('notas')">❌</span>
-  </div>
-  <div class="content">
-    <textarea id="text"></textarea>
-  </div>
-</div>
-
-<div class="window" id="browser" style="top:150px; left:200px;">
-  <div class="title-bar">
-    <span>🌐 Navegador</span>
-    <span class="close" onclick="fechar('browser')">❌</span>
-  </div>
-  <div class="content">
-    <p>Simulação de navegador 👀</p>
-  </div>
-</div>
-
-<div class="window" id="files" style="top:120px; left:250px;">
-  <div class="title-bar">
-    <span>📁 Arquivos</span>
-    <span class="close" onclick="fechar('files')">❌</span>
-  </div>
-  <div class="content">
-    <p>📄 arquivo.txt</p>
-    <p>📄 notas.md</p>
-  </div>
-</div>
-
-<!-- Barra -->
-<div class="taskbar">
-  <div class="start-btn" onclick="toggleMenu()">🪟</div>
-  <input class="search" placeholder="Pesquisar...">
-
-  <div class="task-icons" id="apps"></div>
-
-  <div class="clock" id="clock"></div>
-</div>
-
-<script>
-// abrir janela
-function abrir(id) {
-  document.getElementById(id).style.display = "flex";
-
-  let apps = document.getElementById("apps");
-  if (!document.getElementById("task-" + id)) {
-    let icon = document.createElement("span");
-    icon.innerText = "🟦";
-    icon.id = "task-" + id;
-    icon.onclick = () => abrir(id);
-    apps.appendChild(icon);
-  }
-}
-
-// fechar janela
-function fechar(id) {
-  document.getElementById(id).style.display = "none";
-}
-
-// menu iniciar
-function toggleMenu() {
-  let m = document.getElementById("menu");
-  m.style.display = m.style.display === "block" ? "none" : "block";
-}
-
-// relógio
-function clock() {
-  let d = new Date();
-  document.getElementById("clock").innerText =
-    d.getHours().toString().padStart(2,'0') + ":" +
-    d.getMinutes().toString().padStart(2,'0');
-}
-setInterval(clock,1000);
-clock();
-
-// salvar bloco de notas
-let txt = document.getElementById("text");
-txt.value = localStorage.getItem("notas") || "";
-txt.addEventListener("input", () => {
-  localStorage.setItem("notas", txt.value);
-});
-
-// arrastar janelas
-document.querySelectorAll(".window").forEach(win => {
-  let isDown = false, offsetX, offsetY;
-  const bar = win.querySelector(".title-bar");
-
-  bar.addEventListener("mousedown", e => {
-    isDown = true;
-    offsetX = e.clientX - win.offsetLeft;
-    offsetY = e.clientY - win.offsetTop;
-  });
-
-  document.addEventListener("mouseup", () => isDown = false);
-
-  document.addEventListener("mousemove", e => {
-    if (isDown) {
-      win.style.left = e.clientX - offsetX + "px";
-      win.style.top = e.clientY - offsetY + "px";
-    }
-  });
-});
-</script>
+<footer>
+  © 2026 — Seven
+</footer>
 
 </body>
 </html>
