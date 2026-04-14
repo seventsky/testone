@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS Ultimate</title>
+<title>Seven OS v3</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:"Segoe UI",monospace;background:#05070a;color:#d1d5db;overflow:hidden}
@@ -11,9 +11,13 @@ body{margin:0;font-family:"Segoe UI",monospace;background:#05070a;color:#d1d5db;
 .icon:hover{background:rgba(255,255,255,0.08)}
 .window{position:absolute;width:520px;height:360px;background:#0b0f14;border:1px solid rgba(0,255,150,0.1);border-radius:8px;display:none;flex-direction:column}
 .titlebar{height:32px;background:#111;display:flex;justify-content:space-between;align-items:center;padding:0 10px;cursor:move}
+.controls span{margin-left:10px;cursor:pointer}
 .content{flex:1;padding:10px;overflow:auto}
-.taskbar{height:48px;background:#111;display:flex;align-items:center;padding:0 10px;position:fixed;bottom:0;width:100%}
+.taskbar{height:48px;background:#111;display:flex;align-items:center;padding:0 10px;position:fixed;bottom:0;width:100%;z-index:9999}
+.task{padding:6px 10px;margin:0 4px;border-radius:4px;cursor:pointer;background:rgba(255,255,255,0.05)}
+.task.active{background:rgba(0,255,150,0.2)}
 .terminal{color:#00ff9f;font-size:13px}
+.max{top:0!important;left:0!important;width:100%!important;height:calc(100vh - 48px)!important;border-radius:0}
 </style>
 </head>
 <body>
@@ -28,22 +32,40 @@ body{margin:0;font-family:"Segoe UI",monospace;background:#05070a;color:#d1d5db;
 
 <!-- TERMINAL -->
 <div class="window" id="terminal" style="top:100px;left:200px">
-<div class="titlebar">terminal.exe</div>
+<div class="titlebar">terminal.exe
+<div class="controls">
+<span onclick="minimize('terminal')">—</span>
+<span onclick="maximize('terminal')">⬜</span>
+<span onclick="closeApp('terminal')">✕</span>
+</div>
+</div>
 <div class="content terminal" id="termOut"></div>
 <input id="termIn" style="background:black;color:#0f0;width:100%;border:none">
 </div>
 
-<!-- MUSIC (YOUTUBE SEARCH) -->
+<!-- MUSIC -->
 <div class="window" id="music" style="top:120px;left:240px">
-<div class="titlebar">youtube.exe</div>
+<div class="titlebar">youtube.exe
+<div class="controls">
+<span onclick="minimize('music')">—</span>
+<span onclick="maximize('music')">⬜</span>
+<span onclick="closeApp('music')">✕</span>
+</div>
+</div>
 <div class="content">
-<iframe width="100%" height="100%" src="https://www.youtube.com" ></iframe>
+<iframe width="100%" height="100%" src="https://www.youtube.com"></iframe>
 </div>
 </div>
 
 <!-- BROWSER -->
 <div class="window" id="browser" style="top:140px;left:260px">
-<div class="titlebar">browser.exe</div>
+<div class="titlebar">browser.exe
+<div class="controls">
+<span onclick="minimize('browser')">—</span>
+<span onclick="maximize('browser')">⬜</span>
+<span onclick="closeApp('browser')">✕</span>
+</div>
+</div>
 <div class="content">
 <input id="url" placeholder="type url..." style="width:100%">
 <iframe id="frame" style="width:100%;height:90%"></iframe>
@@ -52,7 +74,13 @@ body{margin:0;font-family:"Segoe UI",monospace;background:#05070a;color:#d1d5db;
 
 <!-- FILES -->
 <div class="window" id="files" style="top:160px;left:280px">
-<div class="titlebar">files.exe</div>
+<div class="titlebar">files.exe
+<div class="controls">
+<span onclick="minimize('files')">—</span>
+<span onclick="maximize('files')">⬜</span>
+<span onclick="closeApp('files')">✕</span>
+</div>
+</div>
 <div class="content">
 <div onclick="alert('arquivo corrompido')">secret.txt</div>
 <div onclick="alert('acesso negado')">system.log</div>
@@ -61,19 +89,45 @@ body{margin:0;font-family:"Segoe UI",monospace;background:#05070a;color:#d1d5db;
 
 <!-- GAME -->
 <div class="window" id="game" style="top:180px;left:300px">
-<div class="titlebar">unknown.exe</div>
+<div class="titlebar">unknown.exe
+<div class="controls">
+<span onclick="minimize('game')">—</span>
+<span onclick="maximize('game')">⬜</span>
+<span onclick="closeApp('game')">✕</span>
+</div>
+</div>
 <div class="content">
 <p>digite no terminal: unlock</p>
 </div>
 </div>
 
-<div class="taskbar">Seven OS Ultimate</div>
+<!-- TASKBAR -->
+<div class="taskbar" id="taskbar">
+<div class="task" onclick="openApp('terminal')">⌨</div>
+<div class="task" onclick="openApp('music')">🎵</div>
+<div class="task" onclick="openApp('browser')">🌐</div>
+<div class="task" onclick="openApp('files')">📁</div>
+</div>
 
 <script>
 function openApp(id){
   let w=document.getElementById(id);
   w.style.display='flex';
   focus(w);
+  setActive(id);
+}
+
+function closeApp(id){
+  document.getElementById(id).style.display='none';
+  removeActive(id);
+}
+
+function minimize(id){
+  document.getElementById(id).style.display='none';
+}
+
+function maximize(id){
+  document.getElementById(id).classList.toggle('max');
 }
 
 function focus(win){
@@ -81,29 +135,37 @@ function focus(win){
   win.style.zIndex=999;
 }
 
-// DRAG WINDOWS
+function setActive(id){
+  document.querySelectorAll('.task').forEach(t=>t.classList.remove('active'));
+  let index = ['terminal','music','browser','files'].indexOf(id);
+  if(index>=0) document.querySelectorAll('.task')[index].classList.add('active');
+}
+
+function removeActive(id){
+  document.querySelectorAll('.task').forEach(t=>t.classList.remove('active'));
+}
+
+// DRAG
 
 document.querySelectorAll('.window').forEach(win=>{
   let bar=win.querySelector('.titlebar');
-  let isDragging=false, offsetX, offsetY;
+  let is=false,x,y;
 
-  bar.addEventListener('mousedown',e=>{
-    isDragging=true;
-    offsetX=e.clientX-win.offsetLeft;
-    offsetY=e.clientY-win.offsetTop;
+  bar.onmousedown=e=>{
+    is=true;
+    x=e.clientX-win.offsetLeft;
+    y=e.clientY-win.offsetTop;
     focus(win);
-  });
+  };
 
-  document.addEventListener('mousemove',e=>{
-    if(isDragging){
-      win.style.left=(e.clientX-offsetX)+'px';
-      win.style.top=(e.clientY-offsetY)+'px';
+  document.onmousemove=e=>{
+    if(is && !win.classList.contains('max')){
+      win.style.left=(e.clientX-x)+'px';
+      win.style.top=(e.clientY-y)+'px';
     }
-  });
+  };
 
-  document.addEventListener('mouseup',()=>{
-    isDragging=false;
-  });
+  document.onmouseup=()=>is=false;
 });
 
 // TERMINAL
@@ -116,11 +178,11 @@ if(e.key==='Enter'){
 let cmd=input.value;
 out.innerHTML+="<div>> "+cmd+"</div>";
 
-if(cmd==='help') out.innerHTML+="<div>help unlock scan</div>";
-else if(cmd==='scan') out.innerHTML+="<div>system clean</div>";
-else if(cmd==='unlock'){secret=true;out.innerHTML+="<div>hidden system unlocked</div>"}
+if(cmd==='help') out.innerHTML+="<div>help unlock scan run secret</div>";
+else if(cmd==='scan') out.innerHTML+="<div>scanning system...</div>";
+else if(cmd==='unlock'){secret=true;out.innerHTML+="<div>access granted</div>"}
 else if(cmd==='run secret' && secret) openApp('game');
-else out.innerHTML+="<div>unknown</div>";
+else out.innerHTML+="<div>unknown command</div>";
 
 input.value='';
 }
@@ -128,12 +190,10 @@ input.value='';
 
 // BROWSER
 url.addEventListener('keydown',e=>{
-if(e.key==='Enter'){
-frame.src="https://"+url.value;
-}
+if(e.key==='Enter') frame.src="https://"+url.value;
 });
+
 </script>
 
 </body>
 </html>
-
