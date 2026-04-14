@@ -2,30 +2,66 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v13.5</title>
+<title>Seven OS v14.5</title>
 
 <style>
-*{box-sizing:border-box}
+:root{
+--bg:#05070a;
+--bg2:#0f1722;
+--text:#d1d5db;
+--panel:#111;
+--accent:#00ff9f;
+}
+
+.light{
+--bg:#e5e7eb;
+--bg2:#ffffff;
+--text:#111;
+--panel:#f3f4f6;
+--accent:#0ea5e9;
+}
 
 body{
 margin:0;
 font-family:"Segoe UI", monospace;
-background:radial-gradient(circle at top,#0f1722,#05070a);
-color:#d1d5db;
+background:radial-gradient(circle at top,var(--bg2),var(--bg));
+color:var(--text);
 overflow:hidden;
 }
 
 /* LOGIN */
 #login{
-position:fixed;width:100%;height:100%;
-background:black;display:flex;
-align-items:center;justify-content:center;
+position:fixed;
+width:100%;height:100%;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+background:radial-gradient(circle,#05070a,#000);
 z-index:9999;
 }
-#loginBox{
-background:#111;padding:20px;
-border:1px solid rgba(0,255,150,0.3);
+
+#clockLogin{
+position:absolute;
+top:40px;
+font-size:40px;
+opacity:0.8;
 }
+
+.user{
+cursor:pointer;
+padding:25px;
+border-radius:12px;
+transition:.3s;
+text-align:center;
+}
+
+.user:hover{
+background:rgba(0,255,150,0.1);
+transform:scale(1.05);
+}
+
+.user span{display:block;margin-top:10px}
 
 /* DESKTOP */
 .desktop{
@@ -40,181 +76,157 @@ gap:14px;
 .icon{
 text-align:center;
 padding:6px;
-border-radius:6px;
 cursor:pointer;
+border-radius:6px;
 }
 .icon:hover{background:rgba(255,255,255,0.05)}
 
 /* TASKBAR */
 .taskbar{
 height:48px;
-background:rgba(10,15,20,0.85);
+background:var(--panel);
 display:flex;
 align-items:center;
 padding:0 10px;
 position:fixed;
 bottom:0;width:100%;
-backdrop-filter:blur(10px);
 }
 
-.start{cursor:pointer;padding:6px}
 .apps{display:flex;gap:8px;margin-left:10px}
-.task{padding:6px;border-radius:4px;cursor:pointer}
-.task.active{background:rgba(0,255,150,0.2)}
+.task{padding:6px;cursor:pointer}
 .clock{margin-left:auto;font-size:12px}
 
 /* WINDOW */
 .window{
 position:absolute;
 width:520px;height:360px;
-background:#0b0f14;
-border:1px solid rgba(0,255,150,0.1);
-border-radius:8px;
+background:var(--panel);
+border:1px solid rgba(0,255,150,0.2);
 display:none;
 flex-direction:column;
 resize:both;
 overflow:hidden;
+border-radius:8px;
 }
-
-.window.active{z-index:999}
 
 .titlebar{
-height:32px;
-background:#111;
+background:#000;
+padding:6px;
+cursor:move;
 display:flex;
 justify-content:space-between;
-align-items:center;
-padding:0 10px;
-cursor:move;
 }
 
-.controls span{margin-left:10px;cursor:pointer}
 .content{flex:1;padding:10px;overflow:auto}
 
 /* FILE */
 .file{
 padding:6px;
-background:#111;
+background:rgba(0,0,0,0.4);
 margin-bottom:6px;
 cursor:pointer;
-border-radius:6px;
 }
-.file:hover{background:rgba(0,255,150,0.15)}
 
 /* EDITOR */
 textarea{
-width:100%;height:100%;
-background:#000;
-color:#00ff9f;
+width:100%;
+height:100%;
+background:black;
+color:var(--accent);
 border:none;
 outline:none;
 }
 
-/* TERMINAL */
-.terminal-input{
-background:transparent;border:none;
-color:#00ff9f;width:100%;outline:none;
+/* SETTINGS */
+.setting{
+padding:10px;
+background:rgba(0,0,0,0.4);
+cursor:pointer;
+margin-bottom:10px;
 }
 
 /* MUSIC */
 .artist{
 padding:8px;
+background:rgba(0,0,0,0.4);
 margin-bottom:6px;
-background:#111;
-border-radius:6px;
 }
-.artist:hover{background:rgba(0,255,150,0.15)}
 
 </style>
 </head>
 
 <body>
 
+<!-- LOGIN -->
 <div id="login">
-<div id="loginBox">
-<input id="user" placeholder="user"><br><br>
-<input id="pass" type="password" placeholder="password"><br><br>
-<button onclick="enter()">login</button>
+<div id="clockLogin"></div>
+
+<div class="user" onclick="enter()">
+🌌
+<span>constelação</span>
 </div>
 </div>
 
+<!-- DESKTOP -->
 <div class="desktop" id="desktop"></div>
 
+<!-- TASKBAR -->
 <div class="taskbar">
-<div class="start">◼</div>
 <div class="apps" id="apps"></div>
 <div class="clock" id="clock"></div>
 </div>
 
 <script>
 
-/* LOGIN */
-function enter(){
-if(user.value==="seven"){
-login.style.display="none"
-init()
-}
-}
-
 /* CLOCK */
 setInterval(()=>{
-clock.innerText=new Date().toLocaleTimeString().slice(0,5)
+let t=new Date()
+clock.innerText=t.toLocaleTimeString().slice(0,5)
+clockLogin.innerText=t.toLocaleTimeString().slice(0,5)
 },1000)
 
-/* FILESYSTEM */
-let fs={
-"C:":{
-"Users":{"Seven":{"notes.txt":"fragmentos..."}},
-"System":{"log.sys":"protected"}
-}
+/* LOGIN */
+function enter(){
+login.style.opacity=0
+setTimeout(()=>{
+login.style.display="none"
+init()
+},400)
 }
 
-let currentPath=["C:"]
-let currentFile=null
+/* THEME */
+function setTheme(mode){
+document.body.classList.toggle("light",mode==="light")
+localStorage.setItem("theme",mode)
+}
 
-function getDir(){return currentPath.reduce((a,b)=>a[b],fs)}
-function listDir(){return Object.keys(getDir())}
-function readFile(n){return getDir()[n]}
-function writeFile(n,c){getDir()[n]=c}
+(function(){
+let saved=localStorage.getItem("theme")
+if(saved) setTheme(saved)
+})()
 
 /* WINDOW SYSTEM */
 function openApp(id){
 let w=document.getElementById(id)
 w.style.display="flex"
 focus(w)
-
-if(!document.getElementById("task-"+id)){
-let t=document.createElement("div")
-t.className="task active"
-t.id="task-"+id
-t.innerText="▣"
-t.onclick=()=>toggleWin(id)
-apps.appendChild(t)
-}
 }
 
-function toggleWin(id){
-let w=document.getElementById(id)
-w.style.display=w.style.display==="none"?"flex":"none"
-}
-
-function focus(win){
-document.querySelectorAll(".window").forEach(w=>w.classList.remove("active"))
-win.classList.add("active")
+function focus(w){
+document.querySelectorAll(".window").forEach(x=>x.style.zIndex=1)
+w.style.zIndex=999
 }
 
 /* DRAG */
 document.addEventListener("mousedown",e=>{
-if(e.target.closest(".titlebar")){
-let win=e.target.closest(".window")
-focus(win)
-
-let shiftX=e.clientX-win.offsetLeft
-let shiftY=e.clientY-win.offsetTop
+if(e.target.classList.contains("titlebar")){
+let win=e.target.parentElement
+let x=e.clientX-win.offsetLeft
+let y=e.clientY-win.offsetTop
 
 function move(e){
-win.style.left=e.clientX-shiftX+"px"
-win.style.top=e.clientY-shiftY+"px"
+win.style.left=e.clientX-x+"px"
+win.style.top=e.clientY-y+"px"
 }
 
 document.addEventListener("mousemove",move)
@@ -231,73 +243,17 @@ d.ondblclick=()=>openApp(app)
 desktop.appendChild(d)
 }
 
-/* CREATE WINDOW */
+/* WINDOW */
 function createWindow(id,title,html){
 let w=document.createElement("div")
 w.className="window"
 w.id=id
 
 w.innerHTML=`
-<div class="titlebar">
-${title}
-<div class="controls">
-<span onclick="this.closest('.window').style.display='none'">—</span>
-<span onclick="this.closest('.window').classList.toggle('max')">⬜</span>
-<span onclick="this.closest('.window').style.display='none'">✕</span>
-</div>
-</div>
+<div class="titlebar">${title}</div>
 <div class="content">${html}</div>`
 
 document.body.appendChild(w)
-}
-
-/* EXPLORER */
-function renderExplorer(){
-fileList.innerHTML=""
-listDir().forEach(f=>{
-let d=document.createElement("div")
-let isFolder=typeof getDir()[f]==="object"
-
-d.className="file"
-d.innerText=(isFolder?"📁 ":"📄 ")+f
-
-d.onclick=()=>{
-if(isFolder){
-currentPath.push(f)
-renderExplorer()
-}else{
-currentFile=f
-openApp("editor")
-editor.value=readFile(f)
-}
-}
-
-fileList.appendChild(d)
-})
-}
-
-/* TERMINAL */
-function term(){
-termIn.onkeydown=e=>{
-if(e.key==="Enter"){
-let cmd=termIn.value
-print("> "+cmd)
-
-let [b,a]=cmd.split(" ")
-
-if(b==="ls") listDir().forEach(f=>print(f))
-if(b==="cd"){currentPath.push(a);renderExplorer()}
-if(b==="clear") termOut.innerHTML=""
-if(b==="whoami") print("seven@os")
-
-termIn.value=""
-}
-}
-}
-
-function print(t){
-termOut.innerHTML+="<div>"+t+"</div>"
-termOut.scrollTop=termOut.scrollHeight
 }
 
 /* INIT */
@@ -307,10 +263,13 @@ createIcon("📰<br>log","files")
 createIcon("📝<br>notes","editor")
 createIcon("⌨<br>terminal","terminal")
 createIcon("🎧<br>youtube","music")
+createIcon("⚙️<br>settings","settings")
 
-createWindow("files","files.exe","<div id='fileList'></div>")
-createWindow("editor","notes.exe","<textarea id='editor'></textarea>")
-createWindow("terminal","terminal.exe","<div id='termOut'></div><input class='terminal-input' id='termIn'>")
+createWindow("files","files.exe","<div class='file'>📄 fragmento.txt</div>")
+
+createWindow("editor","notes.exe","<textarea>escreva aqui...</textarea>")
+
+createWindow("terminal","terminal.exe","<div>> ready</div>")
 
 createWindow("music","youtube.exe",`
 <div class="artist">🎧 forfun</div>
@@ -320,15 +279,10 @@ createWindow("music","youtube.exe",`
 <div class="artist">🩸 sleep token</div>
 `)
 
-setTimeout(renderExplorer,100)
-setTimeout(term,100)
-
-/* AUTO SAVE */
-setInterval(()=>{
-if(currentFile){
-writeFile(currentFile,editor.value)
-}
-},1000)
+createWindow("settings","settings.exe",`
+<div class="setting" onclick="setTheme('dark')">🌑 tema escuro</div>
+<div class="setting" onclick="setTheme('light')">☀️ tema claro</div>
+`)
 
 }
 
