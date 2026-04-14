@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v24.3</title>
+<title>Seven OS v24.4</title>
 
 <style>
 body{
@@ -13,6 +13,7 @@ color:#d1d5db;
 overflow:hidden;
 }
 
+/* LOGIN */
 #login{
 position:fixed;
 inset:0;
@@ -25,6 +26,7 @@ cursor:pointer;
 z-index:99999;
 }
 
+/* DESKTOP */
 #desktop{
 position:absolute;
 inset:0 0 48px 0;
@@ -35,6 +37,7 @@ padding:20px;
 align-content:start;
 }
 
+/* ICONS */
 .icon{
 width:80px;
 height:80px;
@@ -53,6 +56,7 @@ background:rgba(0,255,150,0.08);
 transform:scale(1.05);
 }
 
+/* TASKBAR */
 .taskbar{
 position:fixed;
 bottom:0;
@@ -76,6 +80,7 @@ padding:6px 10px;
 border-radius:6px;
 cursor:pointer;
 background:#111;
+font-size:14px;
 }
 
 .task.active{
@@ -86,10 +91,11 @@ background:#00ff9f33;
 margin-left:auto;
 }
 
+/* WINDOW */
 .window{
 position:absolute;
-width:480px;
-height:320px;
+width:520px;
+height:340px;
 background:#0b0f14;
 border:1px solid #00ff9f33;
 border-radius:10px;
@@ -105,6 +111,7 @@ padding:6px;
 display:flex;
 justify-content:space-between;
 cursor:move;
+user-select:none;
 }
 
 .content{
@@ -142,6 +149,7 @@ margin-bottom:5px;
 
 let Z=1;
 let APP_REGISTRY={};
+let FILES=[];
 
 /* CLOCK */
 setInterval(()=>{
@@ -162,8 +170,8 @@ let w=document.createElement("div");
 w.className="window";
 w.id=app.id;
 
-w.style.left=(window.innerWidth/2-240)+"px";
-w.style.top=(window.innerHeight/2-160)+"px";
+w.style.left=(window.innerWidth/2-260)+"px";
+w.style.top=(window.innerHeight/2-170)+"px";
 
 w.innerHTML=`
 <div class="titlebar">
@@ -220,29 +228,31 @@ Z++;
 w.style.zIndex=Z;
 }
 
-/* DRAG */
+/* ================= DRAG FIX TOTAL ================= */
+
 function drag(win){
 let bar=win.querySelector(".titlebar");
-let a=false,x=0,y=0;
+let active=false,x=0,y=0;
 
 bar.onmousedown=e=>{
-a=true;
+active=true;
 x=e.clientX-win.offsetLeft;
 y=e.clientY-win.offsetTop;
 focus(win);
 };
 
 document.onmousemove=e=>{
-if(a){
-win.style.left=e.clientX-x+"px";
-win.style.top=e.clientY-y+"px";
+if(active){
+win.style.left=(e.clientX-x)+"px";
+win.style.top=(e.clientY-y)+"px";
 }
 };
 
-document.onmouseup=()=>a=false;
+document.onmouseup=()=>active=false;
 }
 
-/* TASKBAR */
+/* ================= TASKBAR FIX ================= */
+
 function buildTaskbar(){
 let t=document.getElementById("tasks");
 
@@ -255,63 +265,37 @@ t.appendChild(b);
 });
 }
 
-/* ================= THEME (ADICIONADO) ================= */
+/* ================= FILE SYSTEM INTERATIVO ================= */
 
-function setTheme(mode){
-if(mode==="dark"){
-document.body.style.background="#000";
-document.body.style.color="#d1d5db";
-}
-if(mode==="light"){
-document.body.style.background="#e5e7eb";
-document.body.style.color="#111";
-}
-}
+function openFile(name){
+let file=FILES.find(f=>f.name===name);
+if(!file) return;
 
-/* ================= SEARCH HACK (ADICIONADO) ================= */
-
-function searchHack(){
-
-let input=document.querySelector("#search input");
-
-if(!input) return;
-
-input.addEventListener("keydown",(e)=>{
-
-if(e.key==="Enter"){
-
-let val=input.value;
-
-let w=document.getElementById("search");
-
-if(!w) return;
-
-w.querySelector(".content").innerHTML=`
-<div style="text-align:center;padding:20px">
-<div style="font-size:40px">👾</div>
-<h2>SISTEMA INVADIDO</h2>
-<p>${val}</p>
-</div>
-`;
-
-}
-
-});
-
+let el=document.getElementById("fileView");
+if(el) el.value=file.content;
 }
 
 /* ================= INIT ================= */
 
 function init(){
 
-buildTaskbar();
+FILES=[
+{name:"memory.log",content:"system active"},
+{name:"core.dat",content:"constelação layer"},
+{name:"user.sys",content:"locked profile"},
+{name:"boot.sec",content:"secure boot active"}
+];
 
 /* FILES */
 registerApp({
 id:"files",
 title:"files.exe",
 icon:"📁",
-content:`📁 system.log<br>📁 memory.dat`
+content:`
+<h3>FILES SYSTEM</h3>
+${FILES.map(f=>`<div onclick="openFile('${f.name}')">📄 ${f.name}</div>`).join("")}
+<textarea id="fileView"></textarea>
+`
 });
 
 /* NOTES */
@@ -335,7 +319,7 @@ registerApp({
 id:"music",
 title:"music.exe",
 icon:"🎧",
-content:`forfun<br>xamã<br>mac miller`
+content:`forfun<br>xamã<br>mac miller<br>mgk<br>sleep token`
 });
 
 /* PLAYLIST */
@@ -363,29 +347,26 @@ icon:"🔍",
 content:`<input placeholder="search system">`
 });
 
-/* SETTINGS (ATUALIZADO) */
+/* SETTINGS */
 registerApp({
 id:"settings",
 title:"settings.exe",
 icon:"⚙",
 content:`
-<h3>themes</h3>
-<button onclick="setTheme('dark')">🌙 dark</button>
-<button onclick="setTheme('light')">☀ light</button>
+<button onclick="document.body.style.background='#000'">dark</button>
+<button onclick="document.body.style.background='#e5e7eb'">light</button>
 `
 });
 
-/* BUILD */
+/* BUILD SYSTEM */
 Object.values(APP_REGISTRY).forEach(app=>{
 createWindow(app);
 createIcon(app);
 });
 
-/* PATCH SEARCH */
-searchHack();
-
 }
 
+/* GAME */
 let c=0;
 function add(){
 c++;
