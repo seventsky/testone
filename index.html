@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v24.3 FINAL</title>
+<title>Seven OS v24.3</title>
 
 <style>
 body{
@@ -194,7 +194,7 @@ d.onclick=()=>openApp(app.id);
 desktop.appendChild(d);
 }
 
-/* APP SYSTEM */
+/* SYSTEM */
 function registerApp(app){
 APP_REGISTRY[app.id]=app;
 }
@@ -255,31 +255,37 @@ t.appendChild(b);
 });
 }
 
-/* ================= THEME SYSTEM (NOVO) ================= */
+/* ================= THEME (ADICIONADO) ================= */
 
 function setTheme(mode){
-if(mode==="light"){
-document.body.style.background="#e5e7eb";
-document.body.style.color="#111";
-}
 if(mode==="dark"){
 document.body.style.background="#000";
 document.body.style.color="#d1d5db";
 }
+if(mode==="light"){
+document.body.style.background="#e5e7eb";
+document.body.style.color="#111";
+}
 }
 
-/* ================= SEARCH HACK SYSTEM (NOVO) ================= */
+/* ================= SEARCH HACK (ADICIONADO) ================= */
 
 function searchHack(){
+
 let input=document.querySelector("#search input");
+
 if(!input) return;
 
 input.addEventListener("keydown",(e)=>{
+
 if(e.key==="Enter"){
+
 let val=input.value;
 
 let w=document.getElementById("search");
-if(w){
+
+if(!w) return;
+
 w.querySelector(".content").innerHTML=`
 <div style="text-align:center;padding:20px">
 <div style="font-size:40px">👾</div>
@@ -287,9 +293,11 @@ w.querySelector(".content").innerHTML=`
 <p>${val}</p>
 </div>
 `;
+
 }
-}
+
 });
+
 }
 
 /* ================= INIT ================= */
@@ -319,10 +327,7 @@ registerApp({
 id:"secrets",
 title:"secrets.exe",
 icon:"🔐",
-content:`
-<h3>somente em criptografia</h3>
-<textarea></textarea>
-`
+content:`<textarea></textarea>`
 });
 
 /* MUSIC */
@@ -376,12 +381,11 @@ createWindow(app);
 createIcon(app);
 });
 
-/* SEARCH PATCH */
+/* PATCH SEARCH */
 searchHack();
 
 }
 
-/* GAME */
 let c=0;
 function add(){
 c++;
