@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v23 FULL</title>
+<title>Seven OS v24.1</title>
 
 <style>
 :root{
@@ -14,7 +14,7 @@
 
 body{
 margin:0;
-font-family:"Segoe UI", monospace;
+font-family:Segoe UI, monospace;
 background:#000;
 color:var(--text);
 overflow:hidden;
@@ -23,41 +23,62 @@ overflow:hidden;
 /* LOGIN */
 #login{
 position:fixed;
-width:100%;
-height:100%;
-background:#000;
+inset:0;
 display:flex;
 align-items:center;
 justify-content:center;
+background:#000;
 font-size:22px;
 cursor:pointer;
-z-index:9999;
+z-index:99999;
 }
 
-/* DESKTOP */
-.desktop{
+/* =========================
+   DESKTOP (FIX REAL)
+========================= */
+#desktop{
 position:absolute;
-width:100%;
-height:calc(100% - 48px);
+inset:0 0 48px 0;
+display:grid;
+grid-template-columns:repeat(auto-fill,90px);
+gap:14px;
+padding:20px;
+align-content:start;
 }
 
 /* ICONS */
 .icon{
 width:80px;
-position:absolute;
+height:80px;
+position:relative;
 text-align:center;
 cursor:pointer;
-padding:6px;
-border-radius:8px;
+padding:10px;
+border-radius:10px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+transition:.2s;
 user-select:none;
 }
-.icon:hover{background:rgba(255,255,255,0.05)}
+
+.icon:hover{
+background:rgba(0,255,150,0.08);
+transform:scale(1.05);
+box-shadow:0 0 10px rgba(0,255,150,0.2);
+}
+
+.icon span{
+font-size:28px;
+}
 
 /* TASKBAR */
 .taskbar{
 position:fixed;
 bottom:0;
-width:100%;
+left:0;
+right:0;
 height:48px;
 background:#0a0f14;
 display:flex;
@@ -75,14 +96,17 @@ margin-left:10px;
 padding:6px 10px;
 border-radius:6px;
 cursor:pointer;
+background:#111;
 }
 .task.active{background:#00ff9f33}
+
+#clock{margin-left:auto}
 
 /* WINDOW SYSTEM */
 .window{
 position:absolute;
-width:500px;
-height:340px;
+width:480px;
+height:320px;
 background:var(--panel);
 border:1px solid #00ff9f33;
 border-radius:10px;
@@ -90,7 +114,6 @@ display:none;
 flex-direction:column;
 overflow:hidden;
 resize:both;
-box-shadow:0 10px 30px rgba(0,0,0,0.6);
 }
 
 .titlebar{
@@ -99,6 +122,7 @@ padding:6px;
 display:flex;
 justify-content:space-between;
 cursor:move;
+user-select:none;
 }
 
 .content{
@@ -115,55 +139,27 @@ padding:6px;
 width:100%;
 margin-bottom:5px;
 }
-
-/* PREVIEW */
-.preview{
-padding:8px;
-margin-top:8px;
-border:1px solid var(--accent);
-background:#000;
-}
-
-/* START MENU */
-.start-menu{
-position:fixed;
-bottom:60px;
-left:10px;
-width:200px;
-background:#111;
-padding:10px;
-display:none;
-border-radius:8px;
-}
-
-.start-item{
-padding:6px;
-cursor:pointer;
-}
-.start-item:hover{background:#00ff9f22}
 </style>
 </head>
 
 <body>
 
-<div id="login" onclick="enter()">🌌 constelação</div>
+<div id="login" onclick="boot()">🌌 constelação</div>
 
-<div class="desktop" id="desktop"></div>
+<div id="desktop"></div>
 
 <div class="taskbar">
-<div class="start" onclick="toggleStart()">◼</div>
+<div class="start">◼</div>
 <div class="tasks" id="tasks"></div>
 <div id="clock"></div>
 </div>
-
-<div class="start-menu" id="startMenu"></div>
 
 <script>
 
 /* ================= CORE ================= */
 
-let z=1;
-let apps=["files","notes","todo","music","playlist","game","search","settings"];
+let Z=1;
+let APP_REGISTRY={};
 
 /* CLOCK */
 setInterval(()=>{
@@ -171,54 +167,84 @@ clock.innerText=new Date().toLocaleTimeString().slice(0,5);
 },1000);
 
 /* LOGIN */
-function enter(){
+function boot(){
 login.style.display="none";
 init();
 }
 
-/* ================= WINDOW ================= */
+/* ================= WINDOW ENGINE ================= */
 
-function createWindow(id,title,html){
+function createWindow(app){
 
 let w=document.createElement("div");
 w.className="window";
-w.id=id;
+w.id=app.id;
 
-w.style.left=(window.innerWidth/2-250)+"px";
-w.style.top=(window.innerHeight/2-170)+"px";
+w.style.left=(window.innerWidth/2-240)+"px";
+w.style.top=(window.innerHeight/2-160)+"px";
 
 w.innerHTML=`
-<div class="titlebar">${title}
+<div class="titlebar">
+${app.title}
 <div>
-<span onclick="min('${id}')">—</span>
-<span onclick="closeW('${id}')">✕</span>
+<span onclick="min('${app.id}')">—</span>
+<span onclick="closeW('${app.id}')">✕</span>
 </div>
 </div>
-<div class="content">${html}</div>
+<div class="content">${app.content}</div>
 `;
 
 document.body.appendChild(w);
 drag(w);
 }
 
+/* ================= ICON SYSTEM (FIX VISUAL) ================= */
+
+function createIcon(app){
+let d=document.createElement("div");
+d.className="icon";
+
+d.innerHTML=`
+<span>${app.icon}</span>
+<div style="font-size:12px;margin-top:5px">${app.title}</div>
+`;
+
+d.onclick=()=>openApp(app.id);
+desktop.appendChild(d);
+}
+
+/* ================= APP SYSTEM ================= */
+
+function registerApp(app){
+APP_REGISTRY[app.id]=app;
+}
+
+/* ================= OPEN / CLOSE ================= */
+
 function openApp(id){
 let w=document.getElementById(id);
+if(w){
 w.style.display="flex";
 focus(w);
 }
+}
 
 function min(id){
-document.getElementById(id).style.display="none";
+let w=document.getElementById(id);
+if(w) w.style.display="none";
 }
 
 function closeW(id){min(id);}
 
+/* ================= FOCUS ================= */
+
 function focus(w){
-z++;
-w.style.zIndex=z;
+Z++;
+w.style.zIndex=Z;
 }
 
-/* DRAG */
+/* ================= DRAG ================= */
+
 function drag(win){
 let bar=win.querySelector(".titlebar");
 let active=false,x=0,y=0;
@@ -242,94 +268,116 @@ document.onmouseup=()=>active=false;
 
 /* ================= TASKBAR ================= */
 
-function initTaskbar(){
-apps.forEach(a=>{
-let t=document.createElement("div");
-t.className="task";
-t.innerText=a;
-t.onclick=()=>openApp(a);
-tasks.appendChild(t);
+function buildTaskbar(){
+let t=document.getElementById("tasks");
+
+Object.keys(APP_REGISTRY).forEach(id=>{
+let b=document.createElement("div");
+b.className="task";
+b.innerText=id;
+b.onclick=()=>openApp(id);
+t.appendChild(b);
 });
 }
 
 /* ================= START ================= */
 
-function toggleStart(){
-startMenu.style.display=
-startMenu.style.display==="block"?"none":"block";
-}
-
-/* ================= GAME ================= */
-
-let score=parseInt(localStorage.getItem("score")||"0");
-
-function addScore(){
-score++;
-localStorage.setItem("score",score);
-document.getElementById("score").innerText="score: "+score;
-}
+document.querySelector(".start").onclick=()=>{
+startMenu.style.display=startMenu.style.display==="block"?"none":"block";
+};
 
 /* ================= INIT ================= */
 
 function init(){
 
-initTaskbar();
+buildTaskbar();
 
-/* FILES */
-createWindow("files","files.exe",`
-📁 system.log<br>
-📁 memory.dat
-`);
+/* ================= APPS (RESTAURADOS + FIX) ================= */
 
-/* NOTES */
-createWindow("notes","notes.exe",`
-<textarea id="note"></textarea>
-<div class="preview"></div>
-`);
+registerApp({
+id:"files",
+title:"files.exe",
+icon:"📁",
+content:"📁 system.log<br>📁 memory.dat"
+});
 
-/* TODO */
-createWindow("todo","todo.exe",`
-<input placeholder="task">
-<button>add</button>
-`);
+registerApp({
+id:"notes",
+title:"notes.exe",
+icon:"📝",
+content:`<textarea></textarea>`
+});
 
-/* MUSIC */
-createWindow("music","music.exe",`
-🎧 forfun<br>
-🌑 xamã<br>
-☁ mac miller<br>
-⚡ mgk<br>
-🌙 sleep token
-`);
+registerApp({
+id:"todo",
+title:"todo.exe",
+icon:"📋",
+content:`<input placeholder="task"><button>add</button>`
+});
 
-/* PLAYLIST */
-createWindow("playlist","playlist.exe",`
+registerApp({
+id:"music",
+title:"music.exe",
+icon:"🎧",
+content:`🎧 forfun<br>🌑 xamã<br>☁ mac miller<br>⚡ mgk<br>🌙 sleep token`
+});
+
+registerApp({
+id:"playlist",
+title:"playlist.exe",
+icon:"🎵",
+content:`
 <iframe width="100%" height="180"
 src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>
-`);
+`
+});
 
-/* GAME */
-createWindow("game","game.exe",`
-<h3>🎮 click system</h3>
+registerApp({
+id:"game",
+title:"game.exe",
+icon:"🎮",
+content:`
+<h3>click game</h3>
 <button onclick="addScore()">CLICK</button>
-<div id="score">score: ${score}</div>
-`);
+<div id="score">0</div>
+`
+});
 
-/* SEARCH */
-createWindow("search","search.exe",`
-<input placeholder="search system">
-<div>no results</div>
-`);
+registerApp({
+id:"search",
+title:"search.exe",
+icon:"🔍",
+content:`<input placeholder="search system">`
+});
 
-/* SETTINGS */
-createWindow("settings","settings.exe",`
-<h3>settings</h3>
+registerApp({
+id:"settings",
+title:"settings.exe",
+icon:"⚙",
+content:`
 <button onclick="document.body.style.background='#000'">dark</button>
 <button onclick="document.body.style.background='#111'">gray</button>
-`);
+`
+});
+
+/* ================= BUILD SYSTEM ================= */
+
+Object.values(APP_REGISTRY).forEach(app=>{
+createWindow(app);
+createIcon(app);
+});
 
 }
 
+/* ================= GAME ================= */
+
+let score=0;
+function addScore(){
+score++;
+document.getElementById("score").innerText=score;
+}
+
 </script>
+
 </body>
 </html>
