@@ -13,7 +13,6 @@ color:#d1d5db;
 overflow:hidden;
 }
 
-/* LOGIN */
 #login{
 position:fixed;
 inset:0;
@@ -26,7 +25,6 @@ cursor:pointer;
 z-index:99999;
 }
 
-/* DESKTOP */
 #desktop{
 position:absolute;
 inset:0 0 48px 0;
@@ -37,7 +35,6 @@ padding:20px;
 align-content:start;
 }
 
-/* ICONS */
 .icon{
 width:80px;
 height:80px;
@@ -56,7 +53,6 @@ background:rgba(0,255,150,0.08);
 transform:scale(1.05);
 }
 
-/* TASKBAR */
 .taskbar{
 position:fixed;
 bottom:0;
@@ -80,7 +76,6 @@ padding:6px 10px;
 border-radius:6px;
 cursor:pointer;
 background:#111;
-font-size:14px;
 }
 
 .task.active{
@@ -91,7 +86,6 @@ background:#00ff9f33;
 margin-left:auto;
 }
 
-/* WINDOW */
 .window{
 position:absolute;
 width:520px;
@@ -228,7 +222,7 @@ Z++;
 w.style.zIndex=Z;
 }
 
-/* ================= DRAG FIX TOTAL ================= */
+/* ================= DRAG FIX ================= */
 
 function drag(win){
 let bar=win.querySelector(".titlebar");
@@ -251,7 +245,7 @@ win.style.top=(e.clientY-y)+"px";
 document.onmouseup=()=>active=false;
 }
 
-/* ================= TASKBAR FIX ================= */
+/* ================= TASKBAR ================= */
 
 function buildTaskbar(){
 let t=document.getElementById("tasks");
@@ -265,37 +259,62 @@ t.appendChild(b);
 });
 }
 
-/* ================= FILE SYSTEM INTERATIVO ================= */
+/* ================= SEARCH (RESTAURADO COMPLETO) ================= */
 
-function openFile(name){
-let file=FILES.find(f=>f.name===name);
-if(!file) return;
+function searchHack(){
 
-let el=document.getElementById("fileView");
-if(el) el.value=file.content;
+let input=document.querySelector("#search input");
+
+if(!input) return;
+
+input.addEventListener("keydown",(e)=>{
+
+if(e.key==="Enter"){
+
+let val=input.value;
+
+let w=document.getElementById("search");
+
+if(!w) return;
+
+/* 👾 HACKED MODE RESTAURADO */
+w.querySelector(".content").innerHTML=`
+<div style="text-align:center;padding:20px">
+<div style="font-size:40px">👾</div>
+<h2>SISTEMA INVADIDO</h2>
+<p>query: ${val}</p>
+</div>
+`;
+
+}
+
+});
+
+}
+
+/* ================= CRYPTO ================= */
+
+function encode(t){
+return btoa(unescape(encodeURIComponent(t)));
+}
+
+function decode(t){
+try{return decodeURIComponent(escape(atob(t)))}
+catch(e){return "erro decode"}
 }
 
 /* ================= INIT ================= */
 
 function init(){
 
-FILES=[
-{name:"memory.log",content:"system active"},
-{name:"core.dat",content:"constelação layer"},
-{name:"user.sys",content:"locked profile"},
-{name:"boot.sec",content:"secure boot active"}
-];
+buildTaskbar();
 
 /* FILES */
 registerApp({
 id:"files",
 title:"files.exe",
 icon:"📁",
-content:`
-<h3>FILES SYSTEM</h3>
-${FILES.map(f=>`<div onclick="openFile('${f.name}')">📄 ${f.name}</div>`).join("")}
-<textarea id="fileView"></textarea>
-`
+content:`📁 system.log<br>📁 memory.dat<br>📁 core.dat`
 });
 
 /* NOTES */
@@ -306,12 +325,18 @@ icon:"📝",
 content:`<textarea></textarea>`
 });
 
-/* SECRETS */
+/* SECRETS (CRIPTO MANTIDO) */
 registerApp({
 id:"secrets",
 title:"secrets.exe",
 icon:"🔐",
-content:`<textarea></textarea>`
+content:`
+<h3>somente em criptografia</h3>
+<textarea id="sec"></textarea>
+<button onclick="out.innerText=encode(sec.value)">encode</button>
+<button onclick="out.innerText=decode(sec.value)">decode</button>
+<div id="out"></div>
+`
 });
 
 /* MUSIC */
@@ -358,15 +383,17 @@ content:`
 `
 });
 
-/* BUILD SYSTEM */
+/* BUILD */
 Object.values(APP_REGISTRY).forEach(app=>{
 createWindow(app);
 createIcon(app);
 });
 
+/* SEARCH PATCH ACTIVO */
+searchHack();
+
 }
 
-/* GAME */
 let c=0;
 function add(){
 c++;
