@@ -5,33 +5,91 @@
 <title>Seven OS v13</title>
 
 <style>
-body{margin:0;background:#05070a;color:#d1d5db;font-family:monospace;overflow:hidden}
+*{box-sizing:border-box}
+
+body{
+margin:0;
+font-family:monospace;
+background:radial-gradient(circle at top,#0f1722,#05070a);
+color:#d1d5db;
+overflow:hidden;
+}
 
 /* LOGIN */
 #login{
-position:absolute;width:100%;height:100%;
-display:flex;align-items:center;justify-content:center;
-background:black;z-index:9999;
+position:fixed;
+width:100%;
+height:100%;
+background:black;
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:9999;
 }
-#loginBox{background:#111;padding:20px;border:1px solid #0f0}
+#loginBox{
+background:#111;
+padding:20px;
+border:1px solid #0f0;
+}
 
 /* DESKTOP */
 .desktop{
-position:absolute;width:100%;height:100%;
-padding:20px;display:flex;flex-wrap:wrap;gap:20px;
+height:calc(100vh - 48px);
+padding:20px;
+display:grid;
+grid-template-columns:repeat(auto-fill,90px);
+gap:14px;
 }
 
+/* ICONES */
 .icon{
-width:70px;text-align:center;cursor:pointer;user-select:none;
+text-align:center;
+padding:6px;
+cursor:pointer;
+border-radius:6px;
 }
+.icon:hover{background:rgba(255,255,255,0.05)}
+
+/* TASKBAR */
+.taskbar{
+height:48px;
+background:rgba(10,15,20,0.9);
+display:flex;
+align-items:center;
+padding:0 10px;
+position:fixed;
+bottom:0;
+width:100%;
+}
+
+.start{cursor:pointer;padding:6px}
+.apps{display:flex;gap:8px;margin-left:10px}
+.task{padding:6px;cursor:pointer}
 
 /* WINDOWS */
 .window{
-position:absolute;width:520px;height:360px;
-background:#0b0f14;border:1px solid #0f0;
-display:none;flex-direction:column;resize:both;overflow:hidden;
+position:absolute;
+width:520px;
+height:360px;
+background:#0b0f14;
+border:1px solid rgba(0,255,150,0.2);
+border-radius:8px;
+display:none;
+flex-direction:column;
+resize:both;
+overflow:hidden;
 }
-.titlebar{background:#111;padding:6px;cursor:move}
+
+.titlebar{
+height:32px;
+background:#111;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:0 10px;
+cursor:move;
+}
+
 .content{flex:1;padding:10px;overflow:auto}
 
 /* FILE */
@@ -40,21 +98,30 @@ display:none;flex-direction:column;resize:both;overflow:hidden;
 
 /* EDITOR */
 textarea{
-width:100%;height:100%;
-background:black;color:#0f0;border:none;outline:none;
+width:100%;
+height:100%;
+background:#000;
+color:#0f0;
+border:none;
+outline:none;
 }
 
-/* MENU */
-#contextMenu{
-position:absolute;background:#111;border:1px solid #0f0;
+/* CONTEXT */
+#menu{
+position:absolute;
+background:#111;
+border:1px solid #0f0;
+display:none;
 }
-#contextMenu div{padding:6px;cursor:pointer}
-#contextMenu div:hover{background:rgba(0,255,150,0.2)}
+#menu div{padding:6px;cursor:pointer}
+#menu div:hover{background:rgba(0,255,150,0.2)}
+
 </style>
 </head>
 
 <body>
 
+<!-- LOGIN -->
 <div id="login">
 <div id="loginBox">
 <input id="user" placeholder="user"><br><br>
@@ -63,7 +130,14 @@ position:absolute;background:#111;border:1px solid #0f0;
 </div>
 </div>
 
-<div id="desktop" class="desktop"></div>
+<!-- DESKTOP -->
+<div class="desktop" id="desktop"></div>
+
+<!-- TASKBAR -->
+<div class="taskbar">
+<div class="start">◼</div>
+<div class="apps" id="apps"></div>
+</div>
 
 <script>
 
@@ -75,130 +149,96 @@ init()
 }
 }
 
-/* STORAGE */
-function saveFS(){localStorage.setItem("sevenFS",JSON.stringify(fs))}
-function loadFS(){return JSON.parse(localStorage.getItem("sevenFS")||"null")}
-
 /* FILESYSTEM */
-let fs=loadFS()||{
+let fs={
 "C:":{
-"Users":{"Seven":{"notes.txt":"hello"}},
+"Users":{"Seven":{"notes.txt":"bem-vindo"}},
 "System":{"log.sys":"protected"}
 }
-};
+}
 
-let currentPath=["C:"];
-let currentFile=null;
+let currentPath=["C:"]
+let currentFile=null
 
 function getDir(){return currentPath.reduce((a,b)=>a[b],fs)}
 function listDir(){return Object.keys(getDir())}
-
 function readFile(n){return getDir()[n]}
-function writeFile(n,c){getDir()[n]=c;saveFS()}
+function writeFile(n,c){getDir()[n]=c}
 
-function makeFile(n){getDir()[n]="";saveFS()}
-function makeDir(n){getDir()[n]={};saveFS()}
+/* WINDOW SYSTEM */
+function openApp(id){
+let w=document.getElementById(id)
+w.style.display="flex"
+focus(w)
+}
 
-function deleteFile(n){delete getDir()[n];saveFS()}
-function renameFile(a,b){let d=getDir();d[b]=d[a];delete d[a];saveFS()}
+function focus(w){
+document.querySelectorAll(".window").forEach(x=>x.style.zIndex=1)
+w.style.zIndex=999
+}
 
-function isProtected(n){return n.endsWith(".sys")}
+/* DRAG */
+document.addEventListener("mousedown",e=>{
+if(e.target.classList.contains("titlebar")){
+let win=e.target.parentElement
+let shiftX=e.clientX-win.offsetLeft
+let shiftY=e.clientY-win.offsetTop
 
-/* CORE */
-const desktop=document.getElementById("desktop")
+function move(e){
+win.style.left=e.clientX-shiftX+"px"
+win.style.top=e.clientY-shiftY+"px"
+}
 
+document.addEventListener("mousemove",move)
+document.addEventListener("mouseup",()=>document.removeEventListener("mousemove",move),{once:true})
+}
+})
+
+/* ICON */
 function createIcon(name,app){
 let d=document.createElement("div")
 d.className="icon"
 d.innerText=name
 d.ondblclick=()=>openApp(app)
-
-/* DRAG ICON */
-d.onmousedown=e=>{
-let shiftX=e.offsetX,shiftY=e.offsetY
-document.onmousemove=ev=>{
-d.style.position="absolute"
-d.style.left=(ev.pageX-shiftX)+"px"
-d.style.top=(ev.pageY-shiftY)+"px"
-}
-document.onmouseup=()=>document.onmousemove=null
-}
-
 desktop.appendChild(d)
 }
 
+/* CREATE WINDOWS */
 function createWindow(id,title,html){
 let w=document.createElement("div")
-w.className="window";w.id=id
-w.innerHTML=`<div class="titlebar">${title}</div><div class="content">${html}</div>`
+w.className="window"
+w.id=id
+
+w.innerHTML=`
+<div class="titlebar">${title}</div>
+<div class="content">${html}</div>`
+
 document.body.appendChild(w)
-drag(w)
-}
-
-function openApp(id){
-document.getElementById(id).style.display="flex"
-}
-
-function drag(win){
-let bar=win.querySelector(".titlebar")
-let is=false,x,y
-bar.onmousedown=e=>{
-is=true;x=e.clientX-win.offsetLeft;y=e.clientY-win.offsetTop}
-document.onmousemove=e=>{
-if(is){win.style.left=(e.clientX-x)+"px";win.style.top=(e.clientY-y)+"px"}}
-document.onmouseup=()=>is=false
 }
 
 /* EXPLORER */
 function renderExplorer(){
 fileList.innerHTML=""
-listDir().forEach(i=>{
+listDir().forEach(f=>{
 let d=document.createElement("div")
-let isFolder=typeof getDir()[i]==="object"
+let isFolder=typeof getDir()[f]==="object"
+
 d.className="file"
-d.innerText=(isFolder?"📁 ":"📄 ")+i
+d.innerText=(isFolder?"📁 ":"📄 ")+f
 
 d.onclick=()=>{
-if(isFolder){currentPath.push(i);renderExplorer()}
-else{
-currentFile=i
+if(isFolder){
+currentPath.push(f)
+renderExplorer()
+}else{
+currentFile=f
 openApp("editor")
-editor.value=readFile(i)
+editor.value=readFile(f)
 }
-}
-
-d.oncontextmenu=e=>{
-e.preventDefault()
-menu(e.clientX,e.clientY,i)
 }
 
 fileList.appendChild(d)
 })
-}
-
-/* MENU */
-function menu(x,y,f){
-let m=document.getElementById("contextMenu")||document.createElement("div")
-m.id="contextMenu"
-m.style.left=x+"px";m.style.top=y+"px"
-
-m.innerHTML=`
-<div onclick="del('${f}')">🗑 deletar</div>
-<div onclick="ren('${f}')">✏ renomear</div>
-`
-document.body.appendChild(m)
-}
-
-document.addEventListener("click",()=>{let m=contextMenu;if(m)m.remove()})
-
-function del(n){
-if(isProtected(n)) return alert("protegido")
-deleteFile(n);renderExplorer()
-}
-
-function ren(n){
-let v=prompt("novo nome")
-if(v){renameFile(n,v);renderExplorer()}
 }
 
 /* TERMINAL */
@@ -207,14 +247,12 @@ input.onkeydown=e=>{
 if(e.key==="Enter"){
 let cmd=input.value
 out.innerHTML+=`<div>> ${cmd}</div>`
+
 let [b,a]=cmd.split(" ")
 
-if(b==="ls") listDir().forEach(f=>out.innerHTML+=`<div>${f}</div>`)
-else if(b==="cd"){currentPath.push(a);renderExplorer()}
-else if(b==="touch"){makeFile(a);renderExplorer()}
-else if(b==="mkdir"){makeDir(a);renderExplorer()}
-else if(b==="rm"){if(!isProtected(a)){deleteFile(a);renderExplorer()}}
-else if(b==="cat"){out.innerHTML+=`<div>${readFile(a)||""}</div>`}
+if(b==="ls") listDir().forEach(x=>out.innerHTML+=`<div>${x}</div>`)
+if(b==="cd"){currentPath.push(a);renderExplorer()}
+if(b==="touch"){getDir()[a]="";renderExplorer()}
 
 input.value=""
 }
@@ -226,7 +264,7 @@ function init(){
 
 createIcon("📁 files","files")
 createIcon("⌨ terminal","terminal")
-createIcon("📝 editor","editor")
+createIcon("📝 notes","editor")
 
 createWindow("files","files.exe","<div id='fileList'></div>")
 createWindow("editor","editor.exe","<textarea id='editor'></textarea>")
@@ -235,21 +273,12 @@ createWindow("terminal","terminal.exe","<div id='out'></div><input id='input'>")
 setTimeout(renderExplorer,100)
 setTimeout(term,100)
 
-/* AUTO SAVE EDITOR */
+/* AUTO SAVE */
 setInterval(()=>{
 if(currentFile){
 writeFile(currentFile,editor.value)
 }
 },1000)
-
-/* SISTEMA VIVO */
-setInterval(()=>{
-if(Math.random()<0.1){
-let d=getDir()
-if(d["notes.txt"]) d["notes.txt"]="você percebeu?"
-saveFS()
-}
-},10000)
 
 }
 
