@@ -2,23 +2,56 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v16</title>
+<title>Seven OS v16.1</title>
 
 <style>
 :root{
 --bg:#05070a;
+--bg2:#0f1722;
 --panel:#0b0f14;
 --text:#d1d5db;
 --accent:#00ff9f;
---blur:blur(10px);
 }
 
 body{
 margin:0;
 font-family:"Segoe UI", monospace;
-background:radial-gradient(circle at top,#0f1722,#05070a);
+background:radial-gradient(circle at top,var(--bg2),var(--bg));
 color:var(--text);
 overflow:hidden;
+}
+
+/* LOGIN */
+#login{
+position:fixed;
+width:100%;
+height:100%;
+background:radial-gradient(circle,#05070a,#000);
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+z-index:9999;
+}
+
+#clockLogin{
+position:absolute;
+top:40px;
+font-size:40px;
+opacity:.8;
+}
+
+.user{
+cursor:pointer;
+padding:20px;
+border-radius:12px;
+transition:.3s;
+text-align:center;
+}
+
+.user:hover{
+background:rgba(0,255,150,0.1);
+transform:scale(1.05);
 }
 
 /* DESKTOP */
@@ -36,7 +69,6 @@ text-align:center;
 cursor:pointer;
 padding:6px;
 border-radius:8px;
-transition:.2s;
 }
 .icon:hover{background:rgba(255,255,255,0.05)}
 
@@ -44,7 +76,6 @@ transition:.2s;
 .taskbar{
 height:50px;
 background:rgba(10,15,20,0.7);
-backdrop-filter:var(--blur);
 display:flex;
 align-items:center;
 padding:0 10px;
@@ -64,9 +95,10 @@ cursor:pointer;
 /* WINDOW */
 .window{
 position:absolute;
-width:520px;height:360px;
+width:520px;
+height:360px;
 background:var(--panel);
-border:1px solid rgba(0,255,150,0.15);
+border:1px solid rgba(0,255,150,0.2);
 border-radius:10px;
 display:none;
 flex-direction:column;
@@ -81,10 +113,15 @@ transition:.2s;
 background:#111;
 padding:8px;
 cursor:move;
+display:flex;
+justify-content:space-between;
 }
 
-/* CONTENT */
-.content{flex:1;padding:10px;overflow:auto}
+.content{
+flex:1;
+padding:10px;
+overflow:auto;
+}
 
 /* INPUT */
 input,textarea{
@@ -97,21 +134,34 @@ outline:none;
 }
 
 /* TODO */
-.todo-item{
+.todo{
 padding:6px;
-margin-bottom:6px;
 background:#111;
+margin-bottom:6px;
 cursor:pointer;
 }
-.done{opacity:0.4;text-decoration:line-through}
+.done{opacity:.4;text-decoration:line-through}
+
 </style>
 </head>
 
 <body>
 
+<!-- LOGIN -->
+<div id="login">
+<div id="clockLogin"></div>
+
+<div class="user" onclick="enter()">
+🌌
+<div>constelação</div>
+</div>
+</div>
+
+<!-- DESKTOP -->
 <div class="desktop" id="desktop"></div>
 
-<div class="taskbar" id="taskbar">
+<!-- TASKBAR -->
+<div class="taskbar">
 <div id="tasks"></div>
 <div class="clock" id="clock"></div>
 </div>
@@ -120,23 +170,41 @@ cursor:pointer;
 
 /* CLOCK */
 setInterval(()=>{
-clock.innerText=new Date().toLocaleTimeString().slice(0,5)
+let t=new Date()
+clock.innerText=t.toLocaleTimeString().slice(0,5)
+clockLogin.innerText=t.toLocaleTimeString().slice(0,5)
 },1000)
+
+/* LOGIN */
+function enter(){
+login.style.opacity=0
+setTimeout(()=>{
+login.style.display="none"
+init()
+},300)
+}
 
 /* SYSTEM */
 let z=1
 
-function focus(w){z++;w.style.zIndex=z}
+function focus(w){
+z++
+w.style.zIndex=z
+}
 
+/* OPEN APP */
 function openApp(id){
 let w=document.getElementById(id)
+
 w.style.display="flex"
 requestAnimationFrame(()=>w.style.opacity=1)
+
 focus(w)
 createTask(id)
 setActive(id,true)
 }
 
+/* MINIMIZE */
 function minimize(id){
 let w=document.getElementById(id)
 w.style.opacity=0
@@ -147,11 +215,14 @@ setActive(id,false)
 /* TASKBAR */
 function createTask(id){
 if(document.getElementById("task-"+id)) return
+
 let t=document.createElement("div")
 t.className="task"
 t.id="task-"+id
 t.innerText=id
+
 t.onclick=()=>toggle(id)
+
 tasks.appendChild(t)
 }
 
@@ -169,6 +240,7 @@ if(t) t.classList.toggle("active",state)
 /* DRAG */
 function drag(win){
 let bar=win.querySelector(".titlebar")
+
 let is=false,x,y
 
 bar.onmousedown=e=>{
@@ -195,10 +267,17 @@ w.className="window"
 w.id=id
 
 w.innerHTML=`
-<div class="titlebar">${title}</div>
+<div class="titlebar">
+${title}
+<div onclick="minimize('${id}')">—</div>
+</div>
 <div class="content">${html}</div>`
 
 document.body.appendChild(w)
+
+w.style.top=Math.random()*200+60+"px"
+w.style.left=Math.random()*300+80+"px"
+
 drag(w)
 }
 
@@ -214,81 +293,52 @@ desktop.appendChild(d)
 /* ================= APPS ================= */
 
 /* NET */
-function renderNet(page="home",q=""){
-let html=""
-
-if(page==="home"){
-html=`
-<h3>home</h3>
-<div onclick="renderNet('music')">🎧 music</div>
-<div onclick="renderNet('notes')">📝 notes</div>
+function renderNet(){
+net.innerHTML=`
+<input placeholder="search...">
+<h3>🌐 home</h3>
+<div>🎧 music</div>
+<div>📝 notes</div>
 `
-}
-
-if(page==="music"){
-html=`
-<h3>music</h3>
-<div>🎧 forfun</div>
-<div>🌑 xamã</div>
-<div>☁ mac miller</div>
-`
-}
-
-if(page==="search"){
-html=`<h3>search: ${q}</h3>
-<div>resultado interno...</div>`
-}
-
-netContent.innerHTML=`
-<input placeholder="search..." onkeydown="if(event.key==='Enter')renderNet('search',this.value)">
-${html}`
 }
 
 /* NOTES */
-function addNote(){
-let val=noteInput.value
-if(!val) return
-let notes=JSON.parse(localStorage.getItem("notes")||"[]")
-notes.push(val)
-localStorage.setItem("notes",JSON.stringify(notes))
-renderNotes()
-noteInput.value=""
+function saveNote(){
+localStorage.setItem("note",note.value)
 }
 
-function renderNotes(){
-let notes=JSON.parse(localStorage.getItem("notes")||"[]")
-notesList.innerHTML=""
-notes.forEach(n=>{
-let d=document.createElement("div")
-d.className="todo-item"
-d.innerText=n
-notesList.appendChild(d)
-})
+function loadNote(){
+note.value=localStorage.getItem("note")||""
 }
 
 /* TODO */
 function addTodo(){
 let val=todoInput.value
 if(!val) return
-let todos=JSON.parse(localStorage.getItem("todos")||"[]")
-todos.push({text:val,done:false})
-localStorage.setItem("todos",JSON.stringify(todos))
+
+let list=JSON.parse(localStorage.getItem("todo")||"[]")
+list.push({t:val,d:false})
+
+localStorage.setItem("todo",JSON.stringify(list))
 renderTodo()
 todoInput.value=""
 }
 
 function renderTodo(){
-let todos=JSON.parse(localStorage.getItem("todos")||"[]")
+let list=JSON.parse(localStorage.getItem("todo")||"[]")
 todoList.innerHTML=""
-todos.forEach((t,i)=>{
+
+list.forEach((e,i)=>{
 let d=document.createElement("div")
-d.className="todo-item "+(t.done?"done":"")
-d.innerText=t.text
+d.className="todo "+(e.d?"done":"")
+d.innerText=e.t
+
 d.onclick=()=>{
-t.done=!t.done
-localStorage.setItem("todos",JSON.stringify(todos))
+e.d=!e.d
+localStorage.setItem("todo",JSON.stringify(list))
 renderTodo()
 }
+
 todoList.appendChild(d)
 })
 }
@@ -299,18 +349,18 @@ function init(){
 icon("🌐<br>net","net")
 icon("📝<br>notes","notes")
 icon("📋<br>todo","todo")
+icon("⌨<br>terminal","terminal")
 
-createWindow("net","net.exe","<div id='netContent'></div>")
-createWindow("notes","notes.exe","<input id='noteInput'><button onclick='addNote()'>add</button><div id='notesList'></div>")
+createWindow("net","net.exe","<div id='net'></div>")
+createWindow("notes","notes.exe","<textarea id='note' oninput='saveNote()'></textarea>")
 createWindow("todo","todo.exe","<input id='todoInput'><button onclick='addTodo()'>add</button><div id='todoList'></div>")
+createWindow("terminal","terminal.exe","<div>> ready</div>")
 
 renderNet()
-renderNotes()
+loadNote()
 renderTodo()
 
 }
-
-init()
 
 </script>
 
