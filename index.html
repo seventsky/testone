@@ -61,8 +61,6 @@ background:rgba(0,255,150,0.1);
 transform:scale(1.05);
 }
 
-.user span{display:block;margin-top:10px}
-
 /* DESKTOP */
 .desktop{
 height:calc(100vh - 48px);
@@ -72,7 +70,6 @@ grid-template-columns:repeat(auto-fill,90px);
 gap:14px;
 }
 
-/* ICON */
 .icon{
 text-align:center;
 padding:6px;
@@ -93,7 +90,6 @@ bottom:0;width:100%;
 }
 
 .apps{display:flex;gap:8px;margin-left:10px}
-.task{padding:6px;cursor:pointer}
 .clock{margin-left:auto;font-size:12px}
 
 /* WINDOW */
@@ -119,24 +115,6 @@ justify-content:space-between;
 
 .content{flex:1;padding:10px;overflow:auto}
 
-/* FILE */
-.file{
-padding:6px;
-background:rgba(0,0,0,0.4);
-margin-bottom:6px;
-cursor:pointer;
-}
-
-/* EDITOR */
-textarea{
-width:100%;
-height:100%;
-background:black;
-color:var(--accent);
-border:none;
-outline:none;
-}
-
 /* SETTINGS */
 .setting{
 padding:10px;
@@ -151,7 +129,6 @@ padding:8px;
 background:rgba(0,0,0,0.4);
 margin-bottom:6px;
 }
-
 </style>
 </head>
 
@@ -160,10 +137,9 @@ margin-bottom:6px;
 <!-- LOGIN -->
 <div id="login">
 <div id="clockLogin"></div>
-
 <div class="user" onclick="enter()">
 🌌
-<span>constelação</span>
+<div>constelação</div>
 </div>
 </div>
 
@@ -217,22 +193,34 @@ document.querySelectorAll(".window").forEach(x=>x.style.zIndex=1)
 w.style.zIndex=999
 }
 
-/* DRAG */
-document.addEventListener("mousedown",e=>{
-if(e.target.classList.contains("titlebar")){
-let win=e.target.parentElement
-let x=e.clientX-win.offsetLeft
-let y=e.clientY-win.offsetTop
+/* DRAG CORRETO */
+function enableDrag(win){
+let bar = win.querySelector(".titlebar")
+
+let isDragging = false
+let offsetX = 0
+let offsetY = 0
+
+bar.addEventListener("mousedown", (e)=>{
+isDragging = true
+offsetX = e.clientX - win.offsetLeft
+offsetY = e.clientY - win.offsetTop
+
+document.addEventListener("mousemove", move)
+document.addEventListener("mouseup", stop, {once:true})
+})
 
 function move(e){
-win.style.left=e.clientX-x+"px"
-win.style.top=e.clientY-y+"px"
+if(!isDragging) return
+win.style.left = (e.clientX - offsetX) + "px"
+win.style.top = (e.clientY - offsetY) + "px"
 }
 
-document.addEventListener("mousemove",move)
-document.addEventListener("mouseup",()=>document.removeEventListener("mousemove",move),{once:true})
+function stop(){
+isDragging = false
+document.removeEventListener("mousemove", move)
 }
-})
+}
 
 /* ICON */
 function createIcon(name,app){
@@ -254,6 +242,7 @@ w.innerHTML=`
 <div class="content">${html}</div>`
 
 document.body.appendChild(w)
+enableDrag(w)
 }
 
 /* INIT */
@@ -265,7 +254,7 @@ createIcon("⌨<br>terminal","terminal")
 createIcon("🎧<br>youtube","music")
 createIcon("⚙️<br>settings","settings")
 
-createWindow("files","files.exe","<div class='file'>📄 fragmento.txt</div>")
+createWindow("files","files.exe","<div>📄 fragmento.txt</div>")
 
 createWindow("editor","notes.exe","<textarea>escreva aqui...</textarea>")
 
