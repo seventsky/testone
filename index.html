@@ -2,199 +2,256 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v7</title>
+<title>Seven OS v13</title>
+
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:"Segoe UI",monospace;background:#05070a;color:#d1d5db;overflow:hidden}
-.desktop{height:calc(100vh - 48px);padding:20px;display:grid;grid-template-columns:repeat(auto-fill,90px);gap:14px}
-.icon{text-align:center;padding:6px;border-radius:6px;cursor:pointer}
-.icon:hover{background:rgba(255,255,255,0.08)}
-.window{position:absolute;width:520px;height:360px;background:#0b0f14;border:1px solid rgba(0,255,150,0.1);border-radius:8px;display:none;flex-direction:column;resize:both;overflow:hidden}
-.titlebar{height:32px;background:#111;display:flex;justify-content:space-between;align-items:center;padding:0 10px;cursor:move}
-.controls span{margin-left:10px;cursor:pointer}
+body{margin:0;background:#05070a;color:#d1d5db;font-family:monospace;overflow:hidden}
+
+/* LOGIN */
+#login{
+position:absolute;width:100%;height:100%;
+display:flex;align-items:center;justify-content:center;
+background:black;z-index:9999;
+}
+#loginBox{background:#111;padding:20px;border:1px solid #0f0}
+
+/* DESKTOP */
+.desktop{
+position:absolute;width:100%;height:100%;
+padding:20px;display:flex;flex-wrap:wrap;gap:20px;
+}
+
+.icon{
+width:70px;text-align:center;cursor:pointer;user-select:none;
+}
+
+/* WINDOWS */
+.window{
+position:absolute;width:520px;height:360px;
+background:#0b0f14;border:1px solid #0f0;
+display:none;flex-direction:column;resize:both;overflow:hidden;
+}
+.titlebar{background:#111;padding:6px;cursor:move}
 .content{flex:1;padding:10px;overflow:auto}
-.taskbar{height:48px;background:#0a0f14;display:flex;align-items:center;padding:0 10px;position:fixed;bottom:0;width:100%;z-index:9999}
-.task{padding:6px 10px;margin:0 4px;border-radius:4px;cursor:pointer;background:rgba(255,255,255,0.05)}
-.task.active{background:rgba(0,255,150,0.2)}
-textarea{width:100%;height:100%;background:transparent;color:white;border:none;outline:none}
-.file{padding:8px;background:#111;margin-bottom:6px;border-radius:6px;cursor:pointer}
-.file:hover{background:rgba(0,255,150,0.1)}
-.artist{padding:6px;margin-bottom:6px;background:#111;border-radius:6px}
-.statusbar{position:absolute;bottom:0;width:100%;font-size:11px;color:#6b7280;padding:2px 8px;background:#0a0f14}
-canvas{background:black}
-.max{top:0!important;left:0!important;width:100%!important;height:calc(100vh - 48px)!important;border-radius:0}
+
+/* FILE */
+.file{padding:6px;background:#111;margin-bottom:6px;cursor:pointer}
+.file:hover{background:rgba(0,255,150,0.2)}
+
+/* EDITOR */
+textarea{
+width:100%;height:100%;
+background:black;color:#0f0;border:none;outline:none;
+}
+
+/* MENU */
+#contextMenu{
+position:absolute;background:#111;border:1px solid #0f0;
+}
+#contextMenu div{padding:6px;cursor:pointer}
+#contextMenu div:hover{background:rgba(0,255,150,0.2)}
 </style>
 </head>
+
 <body>
 
-<div class="desktop">
-<div class="icon" ondblclick="openApp('terminal')">⌨<br>terminal</div>
-<div class="icon" ondblclick="openApp('music')">🎵<br>music</div>
-<div class="icon" ondblclick="openApp('files')">📁<br>files</div>
-<div class="icon" ondblclick="openApp('notes')">🧠<br>notes</div>
-<div class="icon" ondblclick="openApp('browser')">🌐<br>browser</div>
-<div class="icon" ondblclick="openApp('system')">📊<br>system</div>
-<div class="icon" ondblclick="openApp('chat')">💬<br>chat</div>
-<div class="icon" ondblclick="openApp('settings')">⚙<br>settings</div>
-<div class="icon" ondblclick="openApp('game')">🎮<br>game</div>
+<div id="login">
+<div id="loginBox">
+<input id="user" placeholder="user"><br><br>
+<input id="pass" type="password" placeholder="password"><br><br>
+<button onclick="enter()">login</button>
+</div>
 </div>
 
-<!-- MUSIC -->
-<div class="window" id="music" style="top:120px;left:240px">
-<div class="titlebar">music.exe<div class="controls"><span onclick="minimize('music')">—</span><span onclick="maximize('music')">⬜</span><span onclick="closeApp('music')">✕</span></div></div>
-<div class="content">
-<div class="artist">🎸 forfun</div>
-<div class="artist">🔥 xamã</div>
-<div class="artist">🌙 mac miller</div>
-<div class="artist">⚡ mgk</div>
-<div class="artist">🕯️ sleep token</div>
-</div>
-<div class="statusbar">media index loaded</div>
-</div>
-
-<!-- SYSTEM -->
-<div class="window" id="system" style="top:160px;left:350px">
-<div class="titlebar">system.exe<div class="controls"><span onclick="minimize('system')">—</span><span onclick="maximize('system')">⬜</span><span onclick="closeApp('system')">✕</span></div></div>
-<div class="content">
-<div>CPU: <span id="cpu"></span>%</div>
-<div>RAM: <span id="ram"></span>%</div>
-<div>Status: operational</div>
-</div>
-<div class="statusbar">monitoring</div>
-</div>
-
-<!-- CHAT -->
-<div class="window" id="chat" style="top:180px;left:380px">
-<div class="titlebar">chat.exe<div class="controls"><span onclick="minimize('chat')">—</span><span onclick="maximize('chat')">⬜</span><span onclick="closeApp('chat')">✕</span></div></div>
-<div class="content" id="chatBox"><div>system: conectado</div></div>
-<input id="chatInput" placeholder="digite..." style="width:100%">
-</div>
-
-<!-- SETTINGS -->
-<div class="window" id="settings" style="top:200px;left:400px">
-<div class="titlebar">settings.exe<div class="controls"><span onclick="minimize('settings')">—</span><span onclick="maximize('settings')">⬜</span><span onclick="closeApp('settings')">✕</span></div></div>
-<div class="content"><button onclick="toggleTheme()">toggle theme</button></div>
-<div class="statusbar">config loaded</div>
-</div>
-
-<!-- FILES -->
-<div class="window" id="files" style="top:160px;left:280px">
-<div class="titlebar">files.exe<div class="controls"><span onclick="minimize('files')">—</span><span onclick="maximize('files')">⬜</span><span onclick="closeApp('files')">✕</span></div></div>
-<div class="content" id="fileList">
-<div class="file" onclick="openFile('f1')">fragmento.txt</div>
-<div class="file" onclick="openFile('f2')">log.sys</div>
-<div class="file" onclick="openFile('f3')">readme.md</div>
-</div>
-<div class="statusbar">3 items</div>
-</div>
-
-<!-- VIEWER -->
-<div class="window" id="viewer" style="top:180px;left:320px">
-<div class="titlebar">viewer.exe<div class="controls"><span onclick="minimize('viewer')">—</span><span onclick="maximize('viewer')">⬜</span><span onclick="closeApp('viewer')">✕</span></div></div>
-<div class="content" id="fileContent"></div>
-<div class="statusbar" id="viewerStatus">ready</div>
-</div>
-
-<!-- NOTES -->
-<div class="window" id="notes" style="top:140px;left:200px">
-<div class="titlebar">notes.exe<div class="controls"><span onclick="minimize('notes')">—</span><span onclick="maximize('notes')">⬜</span><span onclick="closeApp('notes')">✕</span></div></div>
-<div class="content"><textarea id="note"></textarea></div>
-<div class="statusbar">autosave enabled</div>
-</div>
-
-<!-- BROWSER -->
-<div class="window" id="browser" style="top:140px;left:260px">
-<div class="titlebar">browser.exe<div class="controls"><span onclick="minimize('browser')">—</span><span onclick="maximize('browser')">⬜</span><span onclick="closeApp('browser')">✕</span></div></div>
-<div class="content"><input id="url" placeholder="https://..." style="width:100%"><iframe id="frame" style="width:100%;height:90%"></iframe></div>
-<div class="statusbar">network idle</div>
-</div>
-
-<!-- GAME -->
-<div class="window" id="game" style="top:200px;left:300px">
-<div class="titlebar">game.exe<div class="controls"><span onclick="minimize('game')">—</span><span onclick="maximize('game')">⬜</span><span onclick="closeApp('game')">✕</span></div></div>
-<div class="content"><canvas id="gameCanvas" width="300" height="200"></canvas></div>
-</div>
-
-<!-- TERMINAL -->
-<div class="window" id="terminal" style="top:100px;left:200px">
-<div class="titlebar">terminal.exe<div class="controls"><span onclick="minimize('terminal')">—</span><span onclick="maximize('terminal')">⬜</span><span onclick="closeApp('terminal')">✕</span></div></div>
-<div class="content" id="termOut"></div>
-<input id="termIn" style="background:black;color:#0f0;width:100%;border:none">
-<div class="statusbar">user: seven</div>
-</div>
-
-<!-- TASKBAR -->
-<div class="taskbar">
-<div class="task" onclick="openApp('terminal')">⌨</div>
-<div class="task" onclick="openApp('music')">🎵</div>
-<div class="task" onclick="openApp('files')">📁</div>
-<div class="task" onclick="openApp('notes')">🧠</div>
-<div class="task" onclick="openApp('browser')">🌐</div>
-<div class="task" onclick="openApp('system')">📊</div>
-<div class="task" onclick="openApp('chat')">💬</div>
-<div class="task" onclick="openApp('settings')">⚙</div>
-<div class="task" onclick="openApp('game')">🎮</div>
-</div>
+<div id="desktop" class="desktop"></div>
 
 <script>
-function openApp(id){let w=document.getElementById(id);w.style.display='flex';focus(w)}
-function closeApp(id){document.getElementById(id).style.display='none'}
-function minimize(id){document.getElementById(id).style.display='none'}
-function maximize(id){document.getElementById(id).classList.toggle('max')}
-function focus(win){document.querySelectorAll('.window').forEach(w=>w.style.zIndex=1);win.style.zIndex=999}
 
-// DRAG
-
-document.querySelectorAll('.window').forEach(win=>{
-let bar=win.querySelector('.titlebar');let is=false,x,y;
-bar.onmousedown=e=>{is=true;x=e.clientX-win.offsetLeft;y=e.clientY-win.offsetTop;focus(win)};
-document.onmousemove=e=>{if(is&&!win.classList.contains('max')){win.style.left=(e.clientX-x)+'px';win.style.top=(e.clientY-y)+'px'}};
-document.onmouseup=()=>is=false;
-});
-
-// SYSTEM STATS
-setInterval(()=>{
-cpu.innerText=Math.floor(Math.random()*40+10);
-ram.innerText=Math.floor(Math.random()*50+20);
-},1000);
-
-// CHAT
-chatInput.addEventListener("keydown",e=>{
-if(e.key==="Enter"){
-chatBox.innerHTML+=`<div>you: ${chatInput.value}</div>`;
-chatBox.innerHTML+=`<div>system: recebido</div>`;
-chatInput.value="";
+/* LOGIN */
+function enter(){
+if(user.value==="seven"){
+login.style.display="none"
+init()
 }
-});
+}
 
-// FILE SYSTEM
-const filesData={f1:"não começa com escolha.",f2:"[log] sistema operando normalmente.",f3:"Seven OS - sistema experimental."};
-function openFile(id){openApp('viewer');fileContent.innerText=filesData[id];viewerStatus.innerText="opened: "+id;}
+/* STORAGE */
+function saveFS(){localStorage.setItem("sevenFS",JSON.stringify(fs))}
+function loadFS(){return JSON.parse(localStorage.getItem("sevenFS")||"null")}
 
-// NOTES
-let n=document.getElementById('note');n.value=localStorage.getItem('note')||"";n.oninput=()=>localStorage.setItem('note',n.value);
+/* FILESYSTEM */
+let fs=loadFS()||{
+"C:":{
+"Users":{"Seven":{"notes.txt":"hello"}},
+"System":{"log.sys":"protected"}
+}
+};
 
-// TERMINAL
-let out=document.getElementById('termOut');let input=document.getElementById('termIn');let state={deep:false};
-input.addEventListener('keydown',e=>{if(e.key==='Enter'){let cmd=input.value.trim();out.innerHTML+="<div>> "+cmd+"</div>";
-if(cmd==='help') out.innerHTML+="<div>help | scan | scan deep | logs | open secrets</div>";
-else if(cmd==='scan') out.innerHTML+="<div>system OK</div>";
-else if(cmd==='scan deep'){state.deep=true;out.innerHTML+="<div>deep scan running...</div>";}
-else if(cmd==='logs'){if(state.deep) out.innerHTML+="<div>[log] delayed response detected.</div>"; else out.innerHTML+="<div>[log] clean.</div>";}
-else if(cmd==='open secrets'){if(state.deep){openApp('viewer');fileContent.innerText="you found the hidden layer.";} else out.innerHTML+="<div>access denied</div>";}
-else out.innerHTML+="<div>unknown command</div>";
-input.value='';}});
+let currentPath=["C:"];
+let currentFile=null;
 
-// GAME
-let c=document.getElementById('gameCanvas');let ctx=c.getContext('2d');let x=10;
-function loop(){ctx.clearRect(0,0,300,200);ctx.fillStyle='#0f0';ctx.fillRect(x,90,20,20);x+=1;if(x>300)x=0;requestAnimationFrame(loop)}
-loop();
+function getDir(){return currentPath.reduce((a,b)=>a[b],fs)}
+function listDir(){return Object.keys(getDir())}
 
-// BROWSER
-url.addEventListener('keydown',e=>{if(e.key==='Enter')frame.src=url.value});
+function readFile(n){return getDir()[n]}
+function writeFile(n,c){getDir()[n]=c;saveFS()}
 
-// SETTINGS
-function toggleTheme(){document.body.style.background=document.body.style.background.includes("05070a")?"#111":"#05070a";}
+function makeFile(n){getDir()[n]="";saveFS()}
+function makeDir(n){getDir()[n]={};saveFS()}
+
+function deleteFile(n){delete getDir()[n];saveFS()}
+function renameFile(a,b){let d=getDir();d[b]=d[a];delete d[a];saveFS()}
+
+function isProtected(n){return n.endsWith(".sys")}
+
+/* CORE */
+const desktop=document.getElementById("desktop")
+
+function createIcon(name,app){
+let d=document.createElement("div")
+d.className="icon"
+d.innerText=name
+d.ondblclick=()=>openApp(app)
+
+/* DRAG ICON */
+d.onmousedown=e=>{
+let shiftX=e.offsetX,shiftY=e.offsetY
+document.onmousemove=ev=>{
+d.style.position="absolute"
+d.style.left=(ev.pageX-shiftX)+"px"
+d.style.top=(ev.pageY-shiftY)+"px"
+}
+document.onmouseup=()=>document.onmousemove=null
+}
+
+desktop.appendChild(d)
+}
+
+function createWindow(id,title,html){
+let w=document.createElement("div")
+w.className="window";w.id=id
+w.innerHTML=`<div class="titlebar">${title}</div><div class="content">${html}</div>`
+document.body.appendChild(w)
+drag(w)
+}
+
+function openApp(id){
+document.getElementById(id).style.display="flex"
+}
+
+function drag(win){
+let bar=win.querySelector(".titlebar")
+let is=false,x,y
+bar.onmousedown=e=>{
+is=true;x=e.clientX-win.offsetLeft;y=e.clientY-win.offsetTop}
+document.onmousemove=e=>{
+if(is){win.style.left=(e.clientX-x)+"px";win.style.top=(e.clientY-y)+"px"}}
+document.onmouseup=()=>is=false
+}
+
+/* EXPLORER */
+function renderExplorer(){
+fileList.innerHTML=""
+listDir().forEach(i=>{
+let d=document.createElement("div")
+let isFolder=typeof getDir()[i]==="object"
+d.className="file"
+d.innerText=(isFolder?"📁 ":"📄 ")+i
+
+d.onclick=()=>{
+if(isFolder){currentPath.push(i);renderExplorer()}
+else{
+currentFile=i
+openApp("editor")
+editor.value=readFile(i)
+}
+}
+
+d.oncontextmenu=e=>{
+e.preventDefault()
+menu(e.clientX,e.clientY,i)
+}
+
+fileList.appendChild(d)
+})
+}
+
+/* MENU */
+function menu(x,y,f){
+let m=document.getElementById("contextMenu")||document.createElement("div")
+m.id="contextMenu"
+m.style.left=x+"px";m.style.top=y+"px"
+
+m.innerHTML=`
+<div onclick="del('${f}')">🗑 deletar</div>
+<div onclick="ren('${f}')">✏ renomear</div>
+`
+document.body.appendChild(m)
+}
+
+document.addEventListener("click",()=>{let m=contextMenu;if(m)m.remove()})
+
+function del(n){
+if(isProtected(n)) return alert("protegido")
+deleteFile(n);renderExplorer()
+}
+
+function ren(n){
+let v=prompt("novo nome")
+if(v){renameFile(n,v);renderExplorer()}
+}
+
+/* TERMINAL */
+function term(){
+input.onkeydown=e=>{
+if(e.key==="Enter"){
+let cmd=input.value
+out.innerHTML+=`<div>> ${cmd}</div>`
+let [b,a]=cmd.split(" ")
+
+if(b==="ls") listDir().forEach(f=>out.innerHTML+=`<div>${f}</div>`)
+else if(b==="cd"){currentPath.push(a);renderExplorer()}
+else if(b==="touch"){makeFile(a);renderExplorer()}
+else if(b==="mkdir"){makeDir(a);renderExplorer()}
+else if(b==="rm"){if(!isProtected(a)){deleteFile(a);renderExplorer()}}
+else if(b==="cat"){out.innerHTML+=`<div>${readFile(a)||""}</div>`}
+
+input.value=""
+}
+}
+}
+
+/* INIT */
+function init(){
+
+createIcon("📁 files","files")
+createIcon("⌨ terminal","terminal")
+createIcon("📝 editor","editor")
+
+createWindow("files","files.exe","<div id='fileList'></div>")
+createWindow("editor","editor.exe","<textarea id='editor'></textarea>")
+createWindow("terminal","terminal.exe","<div id='out'></div><input id='input'>")
+
+setTimeout(renderExplorer,100)
+setTimeout(term,100)
+
+/* AUTO SAVE EDITOR */
+setInterval(()=>{
+if(currentFile){
+writeFile(currentFile,editor.value)
+}
+},1000)
+
+/* SISTEMA VIVO */
+setInterval(()=>{
+if(Math.random()<0.1){
+let d=getDir()
+if(d["notes.txt"]) d["notes.txt"]="você percebeu?"
+saveFS()
+}
+},10000)
+
+}
 
 </script>
 
