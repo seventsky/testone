@@ -1,25 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Seven OS v24.3</title>
+
+<style>
+body{
+margin:0;
+font-family:Segoe UI, monospace;
+background:#000;
+color:#d1d5db;
+overflow:hidden;
+}
+
+/* LOGIN */
+#login{
+position:fixed;
+inset:0;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#000;
+font-size:22px;
+cursor:pointer;
+z-index:99999;
+}
+
+/* DESKTOP */
+#desktop{
+position:absolute;
+inset:0 0 48px 0;
+display:grid;
+grid-template-columns:repeat(auto-fill,90px);
+gap:14px;
+padding:20px;
+align-content:start;
+}
+
+/* ICONS */
+.icon{
+width:80px;
+height:80px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+border-radius:10px;
+cursor:pointer;
+transition:.2s;
+user-select:none;
+}
+
+.icon:hover{
+background:rgba(0,255,150,0.08);
+transform:scale(1.05);
+}
+
+/* TASKBAR */
+.taskbar{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+height:48px;
+background:#0a0f14;
+display:flex;
+align-items:center;
+padding:0 10px;
+}
+
+.tasks{
+display:flex;
+gap:6px;
+margin-left:10px;
+}
+
+.task{
+padding:6px 10px;
+border-radius:6px;
+cursor:pointer;
+background:#111;
+}
+
+.task.active{
+background:#00ff9f33;
+}
+
+#clock{
+margin-left:auto;
+}
+
+/* WINDOW */
+.window{
+position:absolute;
+width:480px;
+height:320px;
+background:#0b0f14;
+border:1px solid #00ff9f33;
+border-radius:10px;
+display:none;
+flex-direction:column;
+resize:both;
+overflow:hidden;
+}
+
+.titlebar{
+background:#111;
+padding:6px;
+display:flex;
+justify-content:space-between;
+cursor:move;
+}
+
+.content{
+flex:1;
+padding:10px;
+overflow:auto;
+}
+
+button,input,textarea{
+background:#000;
+color:#00ff9f;
+border:none;
+padding:6px;
+width:100%;
+margin-bottom:5px;
+}
+
+/* WIDGETS */
+.widget{
+position:absolute;
+top:20px;
+right:20px;
+width:180px;
+padding:10px;
+background:#0b0f14;
+border:1px solid #00ff9f33;
+border-radius:10px;
+font-size:12px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="login" onclick="boot()">🌌 constelação</div>
+
+<div id="desktop"></div>
+
+<div class="widget" id="widget">
+⏱ system online<br>
+📡 constelação OS<br>
+🔐 secure layer active
+</div>
+
+<div class="taskbar">
+<div>◼</div>
+<div class="tasks" id="tasks"></div>
+<div id="clock"></div>
+</div>
+
 <script>
 
 /* ================= CORE ================= */
 
 let Z=1;
 let APP_REGISTRY={};
-let ACTIVE_APP=null;
+let ACTIVE=null;
 
-/* ================= CLOCK ================= */
-
+/* CLOCK */
 setInterval(()=>{
 clock.innerText=new Date().toLocaleTimeString().slice(0,5);
 },1000);
 
-/* ================= LOGIN ================= */
-
+/* LOGIN */
 function boot(){
 login.style.display="none";
 init();
 }
 
-/* ================= WINDOW ENGINE ================= */
+/* ================= WINDOW ================= */
 
 function createWindow(app){
 
@@ -38,7 +198,6 @@ ${app.title}
 <span onclick="closeW('${app.id}')">✕</span>
 </div>
 </div>
-
 <div class="content">${app.content}</div>
 `;
 
@@ -46,64 +205,42 @@ document.body.appendChild(w);
 drag(w);
 }
 
-/* ================= ICON SYSTEM ================= */
+/* ================= ICONS ================= */
 
 function createIcon(app){
 let d=document.createElement("div");
 d.className="icon";
 
 d.innerHTML=`
-<span>${app.icon}</span>
-<div style="font-size:12px;margin-top:5px">${app.title}</div>
+<span style="font-size:26px">${app.icon}</span>
+<div style="font-size:11px">${app.title}</div>
 `;
 
 d.onclick=()=>openApp(app.id);
 desktop.appendChild(d);
 }
 
-/* ================= APP REGISTRY ================= */
+/* ================= SYSTEM ================= */
 
 function registerApp(app){
 APP_REGISTRY[app.id]=app;
 }
 
-/* ================= OPEN / CLOSE ================= */
+/* ================= OPEN ================= */
 
 function openApp(id){
 let w=document.getElementById(id);
 if(!w) return;
 w.style.display="flex";
 focus(w);
-setActiveTask(id);
+setActive(id);
 }
 
 function min(id){
-let w=document.getElementById(id);
-if(w) w.style.display="none";
+document.getElementById(id).style.display="none";
 }
 
 function closeW(id){min(id);}
-
-/* ================= TASKBAR (IMPROVED) ================= */
-
-function buildTaskbar(){
-let t=document.getElementById("tasks");
-
-Object.keys(APP_REGISTRY).forEach(id=>{
-let b=document.createElement("div");
-b.className="task";
-b.innerText=APP_REGISTRY[id].icon;
-
-b.onclick=()=>openApp(id);
-
-t.appendChild(b);
-});
-}
-
-function setActiveTask(id){
-document.querySelectorAll(".task").forEach(t=>t.classList.remove("active"));
-ACTIVE_APP=id;
-}
 
 /* ================= FOCUS ================= */
 
@@ -112,58 +249,76 @@ Z++;
 w.style.zIndex=Z;
 }
 
+function setActive(id){
+document.querySelectorAll(".task").forEach(t=>t.classList.remove("active"));
+}
+
 /* ================= DRAG ================= */
 
 function drag(win){
 let bar=win.querySelector(".titlebar");
-let active=false,x=0,y=0;
+let a=false,x=0,y=0;
 
 bar.onmousedown=e=>{
-active=true;
+a=true;
 x=e.clientX-win.offsetLeft;
 y=e.clientY-win.offsetTop;
 focus(win);
 };
 
 document.onmousemove=e=>{
-if(active){
+if(a){
 win.style.left=e.clientX-x+"px";
 win.style.top=e.clientY-y+"px";
 }
 };
 
-document.onmouseup=()=>active=false;
+document.onmouseup=()=>a=false;
 }
 
-/* ================= ENCODING SYSTEM (SEGREDOS) ================= */
+/* ================= TASKBAR ================= */
 
-function encodeText(text){
-return btoa(unescape(encodeURIComponent(text)));
+function buildTaskbar(){
+let t=document.getElementById("tasks");
+
+Object.values(APP_REGISTRY).forEach(app=>{
+let b=document.createElement("div");
+b.className="task";
+b.innerText=app.icon;
+b.onclick=()=>openApp(app.id);
+t.appendChild(b);
+});
 }
 
-function decodeText(text){
-try{
-return decodeURIComponent(escape(atob(text)));
-}catch(e){
-return "erro na decodificação";
+/* ================= NOTES SYSTEM ================= */
+
+function autoSaveNotes(){
+let n=document.querySelector("#notesArea");
+if(n){
+localStorage.setItem("notes",n.value);
 }
 }
 
-/* ================= FILES (INTERATIVO REAL) ================= */
+/* ================= FILE SYSTEM ================= */
 
 let FILES=[
-{ name:"memory.log", content:"system active" },
-{ name:"core.dat", content:"constelação layer" }
+{name:"memory.log",content:"system online"},
+{name:"core.dat",content:"constelação layer active"},
+{name:"user.sys",content:"profile locked"}
 ];
 
 function openFile(name){
-let file=FILES.find(f=>f.name===name);
-if(!file) return;
+let f=FILES.find(x=>x.name===name);
+if(!f) return;
 
-openApp("files_view");
-
-document.getElementById("fileContent").value=file.content;
+let el=document.getElementById("fileView");
+if(el) el.value=f.content;
 }
+
+/* ================= CRYPTO ================= */
+
+function encode(t){return btoa(unescape(encodeURIComponent(t)))}
+function decode(t){try{return decodeURIComponent(escape(atob(t)))}catch(e){return "error"}}
 
 /* ================= INIT ================= */
 
@@ -171,65 +326,41 @@ function init(){
 
 buildTaskbar();
 
-/* ================= FILES ================= */
-
+/* FILES */
 registerApp({
 id:"files",
 title:"files.exe",
 icon:"📁",
 content:`
-<h3>📁 system files</h3>
-
-<div id="fileList">
+<h3>FILES</h3>
 ${FILES.map(f=>`<div onclick="openFile('${f.name}')">📄 ${f.name}</div>`).join("")}
-</div>
-
-<hr>
-
-<textarea id="fileContent"></textarea>
-
-<div class="preview">click file to open</div>
+<textarea id="fileView"></textarea>
 `
 });
 
-/* hidden viewer */
-registerApp({
-id:"files_view",
-title:"file.viewer",
-icon:"📄",
-content:`<textarea id="fileContent"></textarea>`
-});
-
-/* ================= NOTES ================= */
-
+/* NOTES */
 registerApp({
 id:"notes",
 title:"notes.exe",
 icon:"📝",
-content:`<textarea></textarea>`
+content:`<textarea id="notesArea" oninput="autoSaveNotes()"></textarea>`
 });
 
-/* ================= SEGREDOS (TROCA DO TODO) ================= */
-
+/* SECRETS */
 registerApp({
 id:"secrets",
 title:"secrets.exe",
 icon:"🔐",
 content:`
-<h3>🔐 SOMENTE EM CRIPTOGRAFIA</h3>
-<p>use decode para ler mensagens</p>
-
-<textarea id="secretInput"></textarea>
-
-<button onclick="encrypt()">encode</button>
-<button onclick="decrypt()">decode</button>
-
-<div id="secretOutput" class="preview"></div>
+<h3>somente em criptografia</h3>
+<textarea id="sec"></textarea>
+<button onclick="out.innerText=encode(sec.value)">encode</button>
+<button onclick="out.innerText=decode(sec.value)">decode</button>
+<div id="out"></div>
 `
 });
 
-/* ================= MUSIC ================= */
-
+/* MUSIC */
 registerApp({
 id:"music",
 title:"music.exe",
@@ -237,33 +368,24 @@ icon:"🎧",
 content:`forfun<br>xamã<br>mac miller<br>mgk<br>sleep token`
 });
 
-/* ================= PLAYLIST ================= */
-
+/* PLAYLIST */
 registerApp({
 id:"playlist",
 title:"playlist.exe",
 icon:"🎵",
-content:`
-<iframe width="100%" height="180"
-src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>
-`
+content:`<iframe width="100%" height="180"
+src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>`
 });
 
-/* ================= GAME ================= */
-
+/* GAME */
 registerApp({
 id:"game",
 title:"game.exe",
 icon:"🎮",
-content:`
-<h3>click system</h3>
-<button onclick="addScore()">CLICK</button>
-<div id="score">0</div>
-`
+content:`<button onclick="add()">click</button><div id="g">0</div>`
 });
 
-/* ================= SEARCH ================= */
-
+/* SEARCH */
 registerApp({
 id:"search",
 title:"search.exe",
@@ -271,20 +393,15 @@ icon:"🔍",
 content:`<input placeholder="search system">`
 });
 
-/* ================= SETTINGS ================= */
-
+/* SETTINGS */
 registerApp({
 id:"settings",
 title:"settings.exe",
 icon:"⚙",
-content:`
-<button onclick="document.body.style.background='#000'">dark</button>
-<button onclick="document.body.style.background='#111'">gray</button>
-`
+content:`<button onclick="document.body.style.background='#000'">dark</button>`
 });
 
-/* ================= BUILD SYSTEM ================= */
-
+/* BUILD */
 Object.values(APP_REGISTRY).forEach(app=>{
 createWindow(app);
 createIcon(app);
@@ -292,24 +409,13 @@ createIcon(app);
 
 }
 
-/* ================= SEGREDOS LOGIC ================= */
-
-function encrypt(){
-let t=document.getElementById("secretInput").value;
-document.getElementById("secretOutput").innerText=encodeText(t);
-}
-
-function decrypt(){
-let t=document.getElementById("secretInput").value;
-document.getElementById("secretOutput").innerText=decodeText(t);
-}
-
-/* ================= GAME ================= */
-
-let score=0;
-function addScore(){
-score++;
-document.getElementById("score").innerText=score;
+let c=0;
+function add(){
+c++;
+document.getElementById("g").innerText=c;
 }
 
 </script>
+
+</body>
+</html>
