@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v16.2 FULL</title>
+<title>Seven OS v16.3</title>
 
 <style>
 :root{
@@ -25,7 +25,7 @@ overflow:hidden;
 #login{
 position:fixed;
 width:100%;height:100%;
-background:radial-gradient(circle,#05070a,#000);
+background:#000;
 display:flex;
 align-items:center;
 justify-content:center;
@@ -33,30 +33,22 @@ flex-direction:column;
 z-index:9999;
 }
 
-#clockLogin{
-position:absolute;
-top:40px;
-font-size:40px;
-}
-
-.user{
-cursor:pointer;
-padding:20px;
-border-radius:12px;
-}
-.user:hover{background:rgba(0,255,150,0.1)}
+.user{cursor:pointer;text-align:center}
+.user:hover{color:var(--accent)}
 
 /* DESKTOP */
 .desktop{
-height:calc(100vh - 50px);
-padding:20px;
-display:grid;
-grid-template-columns:repeat(auto-fill,90px);
-gap:14px;
+position:absolute;
+top:0;left:0;
+padding:15px;
+display:flex;
+flex-direction:column;
+gap:12px;
 }
 
 /* ICON */
 .icon{
+width:80px;
 text-align:center;
 cursor:pointer;
 padding:6px;
@@ -66,28 +58,38 @@ border-radius:8px;
 
 /* TASKBAR */
 .taskbar{
-height:50px;
-background:rgba(10,15,20,0.7);
-display:flex;
-align-items:center;
-padding:0 10px;
 position:fixed;
-bottom:0;width:100%;
+bottom:0;
+width:100%;
+height:50px;
+display:flex;
+justify-content:center;
+align-items:center;
+background:rgba(10,15,20,0.8);
+backdrop-filter:blur(10px);
+}
+
+.task-container{
+display:flex;
+gap:10px;
 }
 
 .task{
-padding:6px 10px;
-cursor:pointer;
+padding:6px 12px;
 border-radius:6px;
+cursor:pointer;
 }
 .task.active{background:rgba(0,255,150,0.2)}
 
-.clock{margin-left:auto}
+.clock{
+position:absolute;
+right:15px;
+}
 
 /* WINDOW */
 .window{
 position:absolute;
-width:520px;height:360px;
+width:500px;height:320px;
 background:var(--panel);
 border:1px solid rgba(0,255,150,0.2);
 border-radius:10px;
@@ -95,50 +97,54 @@ display:none;
 flex-direction:column;
 resize:both;
 overflow:hidden;
-box-shadow:0 10px 30px rgba(0,0,0,0.5);
-opacity:0;
-transition:.2s;
+box-shadow:0 10px 30px rgba(0,0,0,0.6);
 }
 
 .titlebar{
 background:#111;
-padding:8px;
-cursor:move;
+padding:6px;
 display:flex;
 justify-content:space-between;
+cursor:move;
+}
+
+.controls span{
+margin-left:8px;
+cursor:pointer;
 }
 
 .content{flex:1;padding:10px;overflow:auto}
 
-input,textarea{
-width:100%;
+.todo{
+background:#111;
+padding:5px;
+margin:4px 0;
+cursor:pointer;
+}
+.done{text-decoration:line-through;opacity:.5}
+
+button{
 background:#000;
 color:var(--accent);
 border:none;
-padding:6px;
-}
-
-.todo{
-padding:6px;
-background:#111;
-margin-bottom:6px;
+padding:5px;
 cursor:pointer;
 }
-.done{opacity:.4;text-decoration:line-through}
 </style>
 </head>
 
 <body>
 
 <div id="login">
-<div id="clockLogin"></div>
-<div class="user" onclick="enter()">🌌<div>constelação</div></div>
+<div class="user" onclick="enter()">
+🌌<div>constelação</div>
+</div>
 </div>
 
 <div class="desktop" id="desktop"></div>
 
 <div class="taskbar">
-<div id="tasks"></div>
+<div class="task-container" id="tasks"></div>
 <div class="clock" id="clock"></div>
 </div>
 
@@ -146,40 +152,41 @@ cursor:pointer;
 
 /* CLOCK */
 setInterval(()=>{
-let t=new Date()
-clock.innerText=t.toLocaleTimeString().slice(0,5)
-clockLogin.innerText=t.toLocaleTimeString().slice(0,5)
+clock.innerText=new Date().toLocaleTimeString().slice(0,5)
 },1000)
 
 /* LOGIN */
 function enter(){
-login.style.opacity=0
-setTimeout(()=>{login.style.display="none";init()},300)
+login.style.display="none"
+init()
 }
 
 /* SYSTEM */
 let z=1
 function focus(w){z++;w.style.zIndex=z}
 
-/* OPEN */
+/* WINDOW CONTROL */
 function openApp(id){
 let w=document.getElementById(id)
 w.style.display="flex"
-requestAnimationFrame(()=>w.style.opacity=1)
 focus(w)
 setActive(id,true)
 }
 
-/* MINIMIZE */
 function minimize(id){
 let w=document.getElementById(id)
-w.style.opacity=0
-setTimeout(()=>w.style.display="none",200)
+w.style.display="none"
+setActive(id,false)
+}
+
+function closeApp(id){
+let w=document.getElementById(id)
+w.style.display="none"
 setActive(id,false)
 }
 
 /* TASKBAR */
-const apps=["net","files","notes","todo","music","playlist"]
+const apps=["net","files","notes","todo","music","playlist","game"]
 
 function initTaskbar(){
 apps.forEach(id=>{
@@ -187,15 +194,9 @@ let t=document.createElement("div")
 t.className="task"
 t.id="task-"+id
 t.innerText=id
-t.onclick=()=>toggle(id)
+t.onclick=()=>openApp(id)
 tasks.appendChild(t)
 })
-}
-
-function toggle(id){
-let w=document.getElementById(id)
-if(w.style.display==="none") openApp(id)
-else minimize(id)
 }
 
 function setActive(id,state){
@@ -234,14 +235,17 @@ w.id=id
 w.innerHTML=`
 <div class="titlebar">
 ${title}
-<div onclick="minimize('${id}')">—</div>
+<div class="controls">
+<span onclick="minimize('${id}')">—</span>
+<span onclick="closeApp('${id}')">✕</span>
 </div>
-<div class="content" id="${id}-content">${html}</div>`
+</div>
+<div class="content">${html}</div>
+`
 
 document.body.appendChild(w)
-
-w.style.top=Math.random()*200+60+"px"
-w.style.left=Math.random()*300+80+"px"
+w.style.top="100px"
+w.style.left="200px"
 
 drag(w)
 }
@@ -255,38 +259,10 @@ d.ondblclick=()=>openApp(id)
 desktop.appendChild(d)
 }
 
-/* ================= APPS ================= */
-
-/* NET */
-function renderNet(){
-net.innerHTML=`
-<input placeholder="search...">
-<h3>🌐 home</h3>
-<div>🎧 music</div>
-<div>📝 notes</div>
-`
+/* MUSIC INTERATIVO */
+function showArtist(name){
+alert("🎧 "+name)
 }
-
-/* FILES */
-let files=[{nome:"fragmento.txt",conteudo:"não começa com escolha."}]
-
-function renderFiles(){
-filesContent.innerHTML=""
-files.forEach(f=>{
-let d=document.createElement("div")
-d.className="todo"
-d.innerText="📄 "+f.nome
-d.onclick=()=>{
-openApp("notes")
-setTimeout(()=>note.value=f.conteudo,200)
-}
-filesContent.appendChild(d)
-})
-}
-
-/* NOTES */
-function saveNote(){localStorage.setItem("note",note.value)}
-function loadNote(){note.value=localStorage.getItem("note")||""}
 
 /* TODO */
 function addTodo(){
@@ -315,16 +291,11 @@ todoList.appendChild(d)
 })
 }
 
-/* PLAYLIST */
-function renderPlaylist(){
-playlist.innerHTML=`
-<h3>🎧 playlist</h3>
-<div>🌊 forfun</div>
-<div>🌑 xamã</div>
-<div>☁ mac miller</div>
-<div>⚡ mgk</div>
-<div>🩸 sleep token</div>
-`
+/* GAME */
+let score=0
+function clickGame(){
+score++
+gameScore.innerText="score: "+score
 }
 
 /* INIT */
@@ -338,19 +309,26 @@ icon("📝<br>notes","notes")
 icon("📋<br>todo","todo")
 icon("🎧<br>music","music")
 icon("🎵<br>playlist","playlist")
+icon("🎮<br>game","game")
 
-createWindow("net","net.exe","<div id='net'></div>")
-createWindow("files","files.exe","<div id='filesContent'></div>")
-createWindow("notes","notes.exe","<textarea id='note' oninput='saveNote()'></textarea>")
-createWindow("todo","todo.exe","<input id='todoInput'><button onclick='addTodo()'>add</button><div id='todoList'></div>")
-createWindow("music","music.exe","<div>🎧 artistas</div>")
-createWindow("playlist","playlist.exe","<div id='playlist'></div>")
+createWindow("music","music.exe",`
+<div onclick="showArtist('forfun')">🎧 forfun</div>
+<div onclick="showArtist('xamã')">🌑 xamã</div>
+<div onclick="showArtist('mac miller')">☁ mac miller</div>
+`)
 
-renderNet()
-renderFiles()
-loadNote()
+createWindow("todo","todo.exe",`
+<input id="todoInput">
+<button onclick="addTodo()">add</button>
+<div id="todoList"></div>
+`)
+
+createWindow("game","game.exe",`
+<button onclick="clickGame()">click me</button>
+<div id="gameScore">score: 0</div>
+`)
+
 renderTodo()
-renderPlaylist()
 
 }
 
