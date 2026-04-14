@@ -17,7 +17,7 @@ login.style.opacity=0
 setTimeout(()=>{
 login.style.display="none"
 init()
-},400)
+},300)
 }
 
 /* =========================
@@ -43,9 +43,11 @@ function openApp(id){
 let w = document.getElementById(id)
 
 w.style.display = "flex"
-focus(w)
+requestAnimationFrame(()=>w.style.opacity = 1)
 
+focus(w)
 createTask(id)
+updateTaskState(id,true)
 }
 
 function focus(win){
@@ -71,19 +73,36 @@ t.onclick = ()=>toggleWindow(id)
 apps.appendChild(t)
 }
 
+function updateTaskState(id,active){
+let t = document.getElementById("task-"+id)
+if(!t) return
+t.style.background = active ? "rgba(0,255,150,0.3)" : "transparent"
+}
+
 function toggleWindow(id){
 let w = document.getElementById(id)
 
 if(w.style.display === "none"){
 w.style.display = "flex"
+requestAnimationFrame(()=>w.style.opacity = 1)
 focus(w)
+updateTaskState(id,true)
 }else{
-w.style.display = "none"
+minimize(id)
 }
 }
 
+function minimize(id){
+let w = document.getElementById(id)
+w.style.opacity = 0
+setTimeout(()=>{
+w.style.display = "none"
+updateTaskState(id,false)
+},200)
+}
+
 /* =========================
-   DRAG (CORRETO)
+   DRAG + SNAP
 ========================= */
 
 function enableDrag(win){
@@ -106,14 +125,51 @@ document.addEventListener("mouseup", stop, {once:true})
 
 function move(e){
 if(!isDragging) return
+
 win.style.left = (e.clientX - offsetX) + "px"
 win.style.top = (e.clientY - offsetY) + "px"
+
+/* SNAP */
+if(e.clientY < 10){
+maximize(win)
+}
+
+if(e.clientX < 10){
+snapLeft(win)
+}
+
+if(e.clientX > window.innerWidth - 10){
+snapRight(win)
+}
 }
 
 function stop(){
 isDragging = false
 document.removeEventListener("mousemove", move)
 }
+}
+
+/* SNAP FUNCTIONS */
+
+function maximize(win){
+win.style.top = "0"
+win.style.left = "0"
+win.style.width = "100%"
+win.style.height = "calc(100vh - 48px)"
+}
+
+function snapLeft(win){
+win.style.top = "0"
+win.style.left = "0"
+win.style.width = "50%"
+win.style.height = "calc(100vh - 48px)"
+}
+
+function snapRight(win){
+win.style.top = "0"
+win.style.left = "50%"
+win.style.width = "50%"
+win.style.height = "calc(100vh - 48px)"
 }
 
 /* =========================
@@ -136,6 +192,7 @@ function createWindow(id,title,html){
 let w=document.createElement("div")
 w.className="window"
 w.id=id
+w.style.opacity=0
 
 w.innerHTML=`
 <div class="titlebar">${title}</div>
@@ -143,13 +200,11 @@ w.innerHTML=`
 
 document.body.appendChild(w)
 
-/* POSIÇÃO INICIAL BONITA */
 w.style.top = Math.random()*200 + 60 + "px"
 w.style.left = Math.random()*300 + 80 + "px"
 
 enableDrag(w)
 
-/* CLICK TRAZ PRA FRENTE */
 w.addEventListener("mousedown",()=>focus(w))
 }
 
