@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v16.1</title>
+<title>Seven OS v16.2 FULL</title>
 
 <style>
 :root{
@@ -24,8 +24,7 @@ overflow:hidden;
 /* LOGIN */
 #login{
 position:fixed;
-width:100%;
-height:100%;
+width:100%;height:100%;
 background:radial-gradient(circle,#05070a,#000);
 display:flex;
 align-items:center;
@@ -38,21 +37,14 @@ z-index:9999;
 position:absolute;
 top:40px;
 font-size:40px;
-opacity:.8;
 }
 
 .user{
 cursor:pointer;
 padding:20px;
 border-radius:12px;
-transition:.3s;
-text-align:center;
 }
-
-.user:hover{
-background:rgba(0,255,150,0.1);
-transform:scale(1.05);
-}
+.user:hover{background:rgba(0,255,150,0.1)}
 
 /* DESKTOP */
 .desktop{
@@ -85,8 +77,8 @@ bottom:0;width:100%;
 
 .task{
 padding:6px 10px;
-border-radius:6px;
 cursor:pointer;
+border-radius:6px;
 }
 .task.active{background:rgba(0,255,150,0.2)}
 
@@ -95,8 +87,7 @@ cursor:pointer;
 /* WINDOW */
 .window{
 position:absolute;
-width:520px;
-height:360px;
+width:520px;height:360px;
 background:var(--panel);
 border:1px solid rgba(0,255,150,0.2);
 border-radius:10px;
@@ -117,23 +108,16 @@ display:flex;
 justify-content:space-between;
 }
 
-.content{
-flex:1;
-padding:10px;
-overflow:auto;
-}
+.content{flex:1;padding:10px;overflow:auto}
 
-/* INPUT */
 input,textarea{
 width:100%;
 background:#000;
 color:var(--accent);
 border:none;
 padding:6px;
-outline:none;
 }
 
-/* TODO */
 .todo{
 padding:6px;
 background:#111;
@@ -141,26 +125,18 @@ margin-bottom:6px;
 cursor:pointer;
 }
 .done{opacity:.4;text-decoration:line-through}
-
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
 <div id="login">
 <div id="clockLogin"></div>
-
-<div class="user" onclick="enter()">
-🌌
-<div>constelação</div>
-</div>
+<div class="user" onclick="enter()">🌌<div>constelação</div></div>
 </div>
 
-<!-- DESKTOP -->
 <div class="desktop" id="desktop"></div>
 
-<!-- TASKBAR -->
 <div class="taskbar">
 <div id="tasks"></div>
 <div class="clock" id="clock"></div>
@@ -178,29 +154,19 @@ clockLogin.innerText=t.toLocaleTimeString().slice(0,5)
 /* LOGIN */
 function enter(){
 login.style.opacity=0
-setTimeout(()=>{
-login.style.display="none"
-init()
-},300)
+setTimeout(()=>{login.style.display="none";init()},300)
 }
 
 /* SYSTEM */
 let z=1
+function focus(w){z++;w.style.zIndex=z}
 
-function focus(w){
-z++
-w.style.zIndex=z
-}
-
-/* OPEN APP */
+/* OPEN */
 function openApp(id){
 let w=document.getElementById(id)
-
 w.style.display="flex"
 requestAnimationFrame(()=>w.style.opacity=1)
-
 focus(w)
-createTask(id)
 setActive(id,true)
 }
 
@@ -213,17 +179,17 @@ setActive(id,false)
 }
 
 /* TASKBAR */
-function createTask(id){
-if(document.getElementById("task-"+id)) return
+const apps=["net","files","notes","todo","music","playlist"]
 
+function initTaskbar(){
+apps.forEach(id=>{
 let t=document.createElement("div")
 t.className="task"
 t.id="task-"+id
 t.innerText=id
-
 t.onclick=()=>toggle(id)
-
 tasks.appendChild(t)
+})
 }
 
 function toggle(id){
@@ -240,7 +206,6 @@ if(t) t.classList.toggle("active",state)
 /* DRAG */
 function drag(win){
 let bar=win.querySelector(".titlebar")
-
 let is=false,x,y
 
 bar.onmousedown=e=>{
@@ -260,7 +225,7 @@ win.style.top=e.clientY-y+"px"
 document.onmouseup=()=>is=false
 }
 
-/* CREATE WINDOW */
+/* WINDOW */
 function createWindow(id,title,html){
 let w=document.createElement("div")
 w.className="window"
@@ -271,7 +236,7 @@ w.innerHTML=`
 ${title}
 <div onclick="minimize('${id}')">—</div>
 </div>
-<div class="content">${html}</div>`
+<div class="content" id="${id}-content">${html}</div>`
 
 document.body.appendChild(w)
 
@@ -302,23 +267,33 @@ net.innerHTML=`
 `
 }
 
-/* NOTES */
-function saveNote(){
-localStorage.setItem("note",note.value)
+/* FILES */
+let files=[{nome:"fragmento.txt",conteudo:"não começa com escolha."}]
+
+function renderFiles(){
+filesContent.innerHTML=""
+files.forEach(f=>{
+let d=document.createElement("div")
+d.className="todo"
+d.innerText="📄 "+f.nome
+d.onclick=()=>{
+openApp("notes")
+setTimeout(()=>note.value=f.conteudo,200)
+}
+filesContent.appendChild(d)
+})
 }
 
-function loadNote(){
-note.value=localStorage.getItem("note")||""
-}
+/* NOTES */
+function saveNote(){localStorage.setItem("note",note.value)}
+function loadNote(){note.value=localStorage.getItem("note")||""}
 
 /* TODO */
 function addTodo(){
 let val=todoInput.value
 if(!val) return
-
 let list=JSON.parse(localStorage.getItem("todo")||"[]")
 list.push({t:val,d:false})
-
 localStorage.setItem("todo",JSON.stringify(list))
 renderTodo()
 todoInput.value=""
@@ -327,38 +302,55 @@ todoInput.value=""
 function renderTodo(){
 let list=JSON.parse(localStorage.getItem("todo")||"[]")
 todoList.innerHTML=""
-
-list.forEach((e,i)=>{
+list.forEach(e=>{
 let d=document.createElement("div")
 d.className="todo "+(e.d?"done":"")
 d.innerText=e.t
-
 d.onclick=()=>{
 e.d=!e.d
 localStorage.setItem("todo",JSON.stringify(list))
 renderTodo()
 }
-
 todoList.appendChild(d)
 })
+}
+
+/* PLAYLIST */
+function renderPlaylist(){
+playlist.innerHTML=`
+<h3>🎧 playlist</h3>
+<div>🌊 forfun</div>
+<div>🌑 xamã</div>
+<div>☁ mac miller</div>
+<div>⚡ mgk</div>
+<div>🩸 sleep token</div>
+`
 }
 
 /* INIT */
 function init(){
 
+initTaskbar()
+
 icon("🌐<br>net","net")
+icon("📁<br>files","files")
 icon("📝<br>notes","notes")
 icon("📋<br>todo","todo")
-icon("⌨<br>terminal","terminal")
+icon("🎧<br>music","music")
+icon("🎵<br>playlist","playlist")
 
 createWindow("net","net.exe","<div id='net'></div>")
+createWindow("files","files.exe","<div id='filesContent'></div>")
 createWindow("notes","notes.exe","<textarea id='note' oninput='saveNote()'></textarea>")
 createWindow("todo","todo.exe","<input id='todoInput'><button onclick='addTodo()'>add</button><div id='todoList'></div>")
-createWindow("terminal","terminal.exe","<div>> ready</div>")
+createWindow("music","music.exe","<div>🎧 artistas</div>")
+createWindow("playlist","playlist.exe","<div id='playlist'></div>")
 
 renderNet()
+renderFiles()
 loadNote()
 renderTodo()
+renderPlaylist()
 
 }
 
