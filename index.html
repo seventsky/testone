@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v6</title>
+<title>Seven OS v7</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:"Segoe UI",monospace;background:#05070a;color:#d1d5db;overflow:hidden}
@@ -21,6 +21,7 @@ textarea{width:100%;height:100%;background:transparent;color:white;border:none;o
 .file:hover{background:rgba(0,255,150,0.1)}
 .artist{padding:6px;margin-bottom:6px;background:#111;border-radius:6px}
 .statusbar{position:absolute;bottom:0;width:100%;font-size:11px;color:#6b7280;padding:2px 8px;background:#0a0f14}
+canvas{background:black}
 .max{top:0!important;left:0!important;width:100%!important;height:calc(100vh - 48px)!important;border-radius:0}
 </style>
 </head>
@@ -32,6 +33,10 @@ textarea{width:100%;height:100%;background:transparent;color:white;border:none;o
 <div class="icon" ondblclick="openApp('files')">📁<br>files</div>
 <div class="icon" ondblclick="openApp('notes')">🧠<br>notes</div>
 <div class="icon" ondblclick="openApp('browser')">🌐<br>browser</div>
+<div class="icon" ondblclick="openApp('system')">📊<br>system</div>
+<div class="icon" ondblclick="openApp('chat')">💬<br>chat</div>
+<div class="icon" ondblclick="openApp('settings')">⚙<br>settings</div>
+<div class="icon" ondblclick="openApp('game')">🎮<br>game</div>
 </div>
 
 <!-- MUSIC -->
@@ -45,6 +50,31 @@ textarea{width:100%;height:100%;background:transparent;color:white;border:none;o
 <div class="artist">🕯️ sleep token</div>
 </div>
 <div class="statusbar">media index loaded</div>
+</div>
+
+<!-- SYSTEM -->
+<div class="window" id="system" style="top:160px;left:350px">
+<div class="titlebar">system.exe<div class="controls"><span onclick="minimize('system')">—</span><span onclick="maximize('system')">⬜</span><span onclick="closeApp('system')">✕</span></div></div>
+<div class="content">
+<div>CPU: <span id="cpu"></span>%</div>
+<div>RAM: <span id="ram"></span>%</div>
+<div>Status: operational</div>
+</div>
+<div class="statusbar">monitoring</div>
+</div>
+
+<!-- CHAT -->
+<div class="window" id="chat" style="top:180px;left:380px">
+<div class="titlebar">chat.exe<div class="controls"><span onclick="minimize('chat')">—</span><span onclick="maximize('chat')">⬜</span><span onclick="closeApp('chat')">✕</span></div></div>
+<div class="content" id="chatBox"><div>system: conectado</div></div>
+<input id="chatInput" placeholder="digite..." style="width:100%">
+</div>
+
+<!-- SETTINGS -->
+<div class="window" id="settings" style="top:200px;left:400px">
+<div class="titlebar">settings.exe<div class="controls"><span onclick="minimize('settings')">—</span><span onclick="maximize('settings')">⬜</span><span onclick="closeApp('settings')">✕</span></div></div>
+<div class="content"><button onclick="toggleTheme()">toggle theme</button></div>
+<div class="statusbar">config loaded</div>
 </div>
 
 <!-- FILES -->
@@ -75,11 +105,14 @@ textarea{width:100%;height:100%;background:transparent;color:white;border:none;o
 <!-- BROWSER -->
 <div class="window" id="browser" style="top:140px;left:260px">
 <div class="titlebar">browser.exe<div class="controls"><span onclick="minimize('browser')">—</span><span onclick="maximize('browser')">⬜</span><span onclick="closeApp('browser')">✕</span></div></div>
-<div class="content">
-<input id="url" placeholder="https://..." style="width:100%">
-<iframe id="frame" style="width:100%;height:90%"></iframe>
-</div>
+<div class="content"><input id="url" placeholder="https://..." style="width:100%"><iframe id="frame" style="width:100%;height:90%"></iframe></div>
 <div class="statusbar">network idle</div>
+</div>
+
+<!-- GAME -->
+<div class="window" id="game" style="top:200px;left:300px">
+<div class="titlebar">game.exe<div class="controls"><span onclick="minimize('game')">—</span><span onclick="maximize('game')">⬜</span><span onclick="closeApp('game')">✕</span></div></div>
+<div class="content"><canvas id="gameCanvas" width="300" height="200"></canvas></div>
 </div>
 
 <!-- TERMINAL -->
@@ -97,6 +130,10 @@ textarea{width:100%;height:100%;background:transparent;color:white;border:none;o
 <div class="task" onclick="openApp('files')">📁</div>
 <div class="task" onclick="openApp('notes')">🧠</div>
 <div class="task" onclick="openApp('browser')">🌐</div>
+<div class="task" onclick="openApp('system')">📊</div>
+<div class="task" onclick="openApp('chat')">💬</div>
+<div class="task" onclick="openApp('settings')">⚙</div>
+<div class="task" onclick="openApp('game')">🎮</div>
 </div>
 
 <script>
@@ -115,53 +152,49 @@ document.onmousemove=e=>{if(is&&!win.classList.contains('max')){win.style.left=(
 document.onmouseup=()=>is=false;
 });
 
-// FILE SYSTEM
-const filesData={
-f1:"não começa com escolha.",
-f2:"[log] sistema operando normalmente.",
-f3:"Seven OS - sistema experimental."
-};
+// SYSTEM STATS
+setInterval(()=>{
+cpu.innerText=Math.floor(Math.random()*40+10);
+ram.innerText=Math.floor(Math.random()*50+20);
+},1000);
 
-function openFile(id){
-openApp('viewer');
-fileContent.innerText=filesData[id];
-viewerStatus.innerText="opened: "+id;
+// CHAT
+chatInput.addEventListener("keydown",e=>{
+if(e.key==="Enter"){
+chatBox.innerHTML+=`<div>you: ${chatInput.value}</div>`;
+chatBox.innerHTML+=`<div>system: recebido</div>`;
+chatInput.value="";
 }
+});
+
+// FILE SYSTEM
+const filesData={f1:"não começa com escolha.",f2:"[log] sistema operando normalmente.",f3:"Seven OS - sistema experimental."};
+function openFile(id){openApp('viewer');fileContent.innerText=filesData[id];viewerStatus.innerText="opened: "+id;}
 
 // NOTES
 let n=document.getElementById('note');n.value=localStorage.getItem('note')||"";n.oninput=()=>localStorage.setItem('note',n.value);
 
 // TERMINAL
-let out=document.getElementById('termOut');let input=document.getElementById('termIn');
-let state={deep:false};
-
-input.addEventListener('keydown',e=>{
-if(e.key==='Enter'){
-let cmd=input.value.trim();
-out.innerHTML+="<div>> "+cmd+"</div>";
-
-if(cmd==='help') out.innerHTML+="<div>help | scan | scan deep | logs</div>";
+let out=document.getElementById('termOut');let input=document.getElementById('termIn');let state={deep:false};
+input.addEventListener('keydown',e=>{if(e.key==='Enter'){let cmd=input.value.trim();out.innerHTML+="<div>> "+cmd+"</div>";
+if(cmd==='help') out.innerHTML+="<div>help | scan | scan deep | logs | open secrets</div>";
 else if(cmd==='scan') out.innerHTML+="<div>system OK</div>";
-else if(cmd==='scan deep'){state.deep=true;out.innerHTML+="<div>deep scan running...</div>";setTimeout(()=>{out.innerHTML+="<div>no anomalies (hidden)</div>";},1000);} 
-else if(cmd==='logs'){
-if(state.deep) out.innerHTML+="<div>[log] delayed response detected.</div>";
-else out.innerHTML+="<div>[log] clean.</div>";
-}
+else if(cmd==='scan deep'){state.deep=true;out.innerHTML+="<div>deep scan running...</div>";}
+else if(cmd==='logs'){if(state.deep) out.innerHTML+="<div>[log] delayed response detected.</div>"; else out.innerHTML+="<div>[log] clean.</div>";}
+else if(cmd==='open secrets'){if(state.deep){openApp('viewer');fileContent.innerText="you found the hidden layer.";} else out.innerHTML+="<div>access denied</div>";}
 else out.innerHTML+="<div>unknown command</div>";
+input.value='';}});
 
-input.value='';
-}
-});
+// GAME
+let c=document.getElementById('gameCanvas');let ctx=c.getContext('2d');let x=10;
+function loop(){ctx.clearRect(0,0,300,200);ctx.fillStyle='#0f0';ctx.fillRect(x,90,20,20);x+=1;if(x>300)x=0;requestAnimationFrame(loop)}
+loop();
 
-// subtle system drift
-setInterval(()=>{
-if(state.deep){
-  document.title="Seven OS • active";
-}
-},2000);
-
-// browser
+// BROWSER
 url.addEventListener('keydown',e=>{if(e.key==='Enter')frame.src=url.value});
+
+// SETTINGS
+function toggleTheme(){document.body.style.background=document.body.style.background.includes("05070a")?"#111":"#05070a";}
 
 </script>
 
