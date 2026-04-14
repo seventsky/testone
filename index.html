@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v16.3</title>
+<title>Seven OS v19</title>
 
 <style>
 :root{
@@ -29,32 +29,23 @@ background:#000;
 display:flex;
 align-items:center;
 justify-content:center;
-flex-direction:column;
 z-index:9999;
 }
-
-.user{cursor:pointer;text-align:center}
-.user:hover{color:var(--accent)}
 
 /* DESKTOP */
 .desktop{
 position:absolute;
-top:0;left:0;
-padding:15px;
-display:flex;
-flex-direction:column;
-gap:12px;
+width:100%;
+height:100%;
 }
 
 /* ICON */
 .icon{
+position:absolute;
 width:80px;
 text-align:center;
 cursor:pointer;
-padding:6px;
-border-radius:8px;
 }
-.icon:hover{background:rgba(255,255,255,0.05)}
 
 /* TASKBAR */
 .taskbar{
@@ -66,38 +57,23 @@ display:flex;
 justify-content:center;
 align-items:center;
 background:rgba(10,15,20,0.8);
-backdrop-filter:blur(10px);
 }
 
-.task-container{
-display:flex;
-gap:10px;
-}
-
-.task{
-padding:6px 12px;
-border-radius:6px;
-cursor:pointer;
-}
+.task{padding:6px 10px;cursor:pointer}
 .task.active{background:rgba(0,255,150,0.2)}
 
-.clock{
-position:absolute;
-right:15px;
-}
+.clock{position:absolute;right:10px}
 
 /* WINDOW */
 .window{
 position:absolute;
-width:500px;height:320px;
+width:520px;height:360px;
 background:var(--panel);
 border:1px solid rgba(0,255,150,0.2);
-border-radius:10px;
 display:none;
 flex-direction:column;
 resize:both;
 overflow:hidden;
-box-shadow:0 10px 30px rgba(0,0,0,0.6);
 }
 
 .titlebar{
@@ -108,43 +84,19 @@ justify-content:space-between;
 cursor:move;
 }
 
-.controls span{
-margin-left:8px;
-cursor:pointer;
-}
-
 .content{flex:1;padding:10px;overflow:auto}
 
-.todo{
-background:#111;
-padding:5px;
-margin:4px 0;
-cursor:pointer;
-}
-.done{text-decoration:line-through;opacity:.5}
-
-button{
-background:#000;
-color:var(--accent);
-border:none;
-padding:5px;
-cursor:pointer;
-}
 </style>
 </head>
 
 <body>
 
-<div id="login">
-<div class="user" onclick="enter()">
-🌌<div>constelação</div>
-</div>
-</div>
+<div id="login" onclick="enter()">🌌 constelação</div>
 
 <div class="desktop" id="desktop"></div>
 
 <div class="taskbar">
-<div class="task-container" id="tasks"></div>
+<div id="tasks"></div>
 <div class="clock" id="clock"></div>
 </div>
 
@@ -165,43 +117,28 @@ init()
 let z=1
 function focus(w){z++;w.style.zIndex=z}
 
-/* WINDOW CONTROL */
+/* WINDOW */
 function openApp(id){
 let w=document.getElementById(id)
 w.style.display="flex"
 focus(w)
-setActive(id,true)
-}
-
-function minimize(id){
-let w=document.getElementById(id)
-w.style.display="none"
-setActive(id,false)
 }
 
 function closeApp(id){
-let w=document.getElementById(id)
-w.style.display="none"
-setActive(id,false)
+document.getElementById(id).style.display="none"
 }
 
 /* TASKBAR */
-const apps=["net","files","notes","todo","music","playlist","game"]
+const apps=["files","notes","todo","music","playlist","game","search"]
 
 function initTaskbar(){
 apps.forEach(id=>{
 let t=document.createElement("div")
 t.className="task"
-t.id="task-"+id
 t.innerText=id
 t.onclick=()=>openApp(id)
 tasks.appendChild(t)
 })
-}
-
-function setActive(id,state){
-let t=document.getElementById("task-"+id)
-if(t) t.classList.toggle("active",state)
 }
 
 /* DRAG */
@@ -226,76 +163,94 @@ win.style.top=e.clientY-y+"px"
 document.onmouseup=()=>is=false
 }
 
-/* WINDOW */
+/* WINDOW CREATE */
 function createWindow(id,title,html){
 let w=document.createElement("div")
 w.className="window"
 w.id=id
 
 w.innerHTML=`
-<div class="titlebar">
-${title}
-<div class="controls">
-<span onclick="minimize('${id}')">—</span>
+<div class="titlebar">${title}
 <span onclick="closeApp('${id}')">✕</span>
-</div>
 </div>
 <div class="content">${html}</div>
 `
 
 document.body.appendChild(w)
-w.style.top="100px"
-w.style.left="200px"
-
 drag(w)
 }
 
 /* ICON */
-function icon(name,id){
+function icon(name,id,x,y){
 let d=document.createElement("div")
 d.className="icon"
 d.innerHTML=name
+d.style.left=x+"px"
+d.style.top=y+"px"
 d.ondblclick=()=>openApp(id)
 desktop.appendChild(d)
 }
 
-/* MUSIC INTERATIVO */
-function showArtist(name){
-alert("🎧 "+name)
+/* FILE SYSTEM COM PASTAS */
+let fs = JSON.parse(localStorage.getItem("fs")||"null") || {
+name:"root",
+folders:[],
+files:[]
 }
 
-/* TODO */
-function addTodo(){
-let val=todoInput.value
-if(!val) return
-let list=JSON.parse(localStorage.getItem("todo")||"[]")
-list.push({t:val,d:false})
-localStorage.setItem("todo",JSON.stringify(list))
-renderTodo()
-todoInput.value=""
+let current = fs
+
+function saveFS(){
+localStorage.setItem("fs",JSON.stringify(fs))
 }
 
-function renderTodo(){
-let list=JSON.parse(localStorage.getItem("todo")||"[]")
-todoList.innerHTML=""
-list.forEach(e=>{
+function renderFS(){
+explorer.innerHTML=`<h3>${current.name}</h3>`
+
+current.folders.forEach(f=>{
 let d=document.createElement("div")
-d.className="todo "+(e.d?"done":"")
-d.innerText=e.t
-d.onclick=()=>{
-e.d=!e.d
-localStorage.setItem("todo",JSON.stringify(list))
-renderTodo()
-}
-todoList.appendChild(d)
+d.innerText="📁 "+f.name
+d.onclick=()=>{current=f;renderFS()}
+explorer.appendChild(d)
+})
+
+current.files.forEach(f=>{
+let d=document.createElement("div")
+d.innerText="📄 "+f.name
+d.onclick=()=>openFile(f)
+explorer.appendChild(d)
 })
 }
 
-/* GAME */
-let score=0
-function clickGame(){
-score++
-gameScore.innerText="score: "+score
+function newFolder(){
+let n=prompt("nome da pasta")
+if(!n) return
+current.folders.push({name:n,folders:[],files:[]})
+saveFS()
+renderFS()
+}
+
+function newFile(){
+let n=prompt("nome do arquivo")
+if(!n) return
+current.files.push({name:n,content:""})
+saveFS()
+renderFS()
+}
+
+function openFile(f){
+openApp("notes")
+note.value=f.content
+currentFile=f
+}
+
+let currentFile=null
+
+function saveNote(){
+if(currentFile){
+currentFile.content=note.value
+saveFS()
+}
 }
 
 /* INIT */
@@ -303,36 +258,24 @@ function init(){
 
 initTaskbar()
 
-icon("🌐<br>net","net")
-icon("📁<br>files","files")
-icon("📝<br>notes","notes")
-icon("📋<br>todo","todo")
-icon("🎧<br>music","music")
-icon("🎵<br>playlist","playlist")
-icon("🎮<br>game","game")
+icon("📁 files","files",20,20)
+icon("📝 notes","notes",20,100)
+icon("📋 todo","todo",20,180)
 
-createWindow("music","music.exe",`
-<div onclick="showArtist('forfun')">🎧 forfun</div>
-<div onclick="showArtist('xamã')">🌑 xamã</div>
-<div onclick="showArtist('mac miller')">☁ mac miller</div>
+createWindow("files","files.exe",`
+<button onclick="newFolder()">+ pasta</button>
+<button onclick="newFile()">+ arquivo</button>
+<div id="explorer"></div>
 `)
 
-createWindow("todo","todo.exe",`
-<input id="todoInput">
-<button onclick="addTodo()">add</button>
-<div id="todoList"></div>
+createWindow("notes","notes.exe",`
+<textarea id="note" oninput="saveNote()"></textarea>
 `)
 
-createWindow("game","game.exe",`
-<button onclick="clickGame()">click me</button>
-<div id="gameScore">score: 0</div>
-`)
-
-renderTodo()
+renderFS()
 
 }
 
 </script>
-
 </body>
 </html>
