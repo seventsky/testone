@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v20.1</title>
+<title>Seven OS v21.1</title>
 
 <style>
 :root{
@@ -13,6 +13,15 @@
 --accent:#00ff9f;
 }
 
+/* LIGHT MODE */
+.light{
+--bg:#e5e7eb;
+--bg2:#cbd5e1;
+--panel:#ffffff;
+--text:#111;
+--accent:#0f172a;
+}
+
 body{
 margin:0;
 font-family:"Segoe UI", monospace;
@@ -20,6 +29,16 @@ background:radial-gradient(circle at top,var(--bg2),var(--bg));
 color:var(--text);
 overflow:hidden;
 }
+
+.light body{
+background:linear-gradient(var(--bg2),var(--bg));
+color:var(--text);
+}
+
+.light .window{background:var(--panel)}
+.light .taskbar{background:rgba(255,255,255,0.8)}
+.light .start-menu{background:#fff}
+.light .widget{background:#fff}
 
 /* LOGIN */
 #login{
@@ -31,6 +50,7 @@ align-items:center;
 justify-content:center;
 z-index:9999;
 cursor:pointer;
+font-size:22px;
 }
 
 /* DESKTOP */
@@ -64,7 +84,7 @@ padding:0 10px;
 backdrop-filter:blur(10px);
 }
 
-.start{padding:6px;cursor:pointer;}
+.start{cursor:pointer;padding:6px}
 
 .tasks{
 display:flex;
@@ -116,25 +136,66 @@ cursor:pointer;
 
 .content{flex:1;padding:10px;overflow:auto}
 
-/* UI */
-button{
-background:#000;
-color:var(--accent);
-border:none;
-padding:5px;
-cursor:pointer;
+/* START MENU */
+.start-menu{
+position:fixed;
+bottom:60px;
+left:10px;
+width:240px;
+background:#111;
+border-radius:10px;
+display:none;
+padding:10px;
 }
 
-input,textarea{
-width:100%;
+.start-item{
+padding:8px;
+cursor:pointer;
+}
+.start-item:hover{background:rgba(0,255,150,0.1)}
+
+/* NOTIFICATIONS */
+.notifications{
+position:fixed;
+right:10px;
+bottom:60px;
+width:220px;
+}
+.notif{
+background:#111;
+padding:8px;
+margin-top:6px;
+border-radius:6px;
+}
+
+/* WIDGETS */
+.widgets{
+position:fixed;
+top:10px;
+right:10px;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.widget{
+background:#111;
+padding:10px;
+border-radius:8px;
+}
+
+/* UI */
+button,input,textarea{
 background:#000;
 color:var(--accent);
 border:none;
 padding:5px;
+width:100%;
 margin-bottom:5px;
 }
-.todo{padding:5px;background:#111;margin:3px 0;cursor:pointer}
-.done{text-decoration:line-through;opacity:.5}
+
+.todo{background:#111;padding:5px;margin:3px 0;cursor:pointer}
+.done{opacity:.5;text-decoration:line-through}
 </style>
 </head>
 
@@ -150,11 +211,37 @@ margin-bottom:5px;
 <div class="clock" id="clock"></div>
 </div>
 
+<div class="start-menu" id="startMenu"></div>
+<div class="notifications" id="notifications"></div>
+
+<div class="widgets">
+<div class="widget" id="widgetClock"></div>
+<div class="widget" id="widgetSys"></div>
+</div>
+
 <script>
+
+/* THEME SYSTEM */
+function setTheme(mode){
+if(mode==="light"){
+document.documentElement.classList.add("light")
+localStorage.setItem("theme","light")
+}else{
+document.documentElement.classList.remove("light")
+localStorage.setItem("theme","dark")
+}
+}
+
+(function(){
+let saved=localStorage.getItem("theme")
+if(saved==="light") setTheme("light")
+})()
 
 /* CLOCK */
 setInterval(()=>{
 clock.innerText=new Date().toLocaleTimeString().slice(0,5)
+widgetClock.innerText="🕒 "+clock.innerText
+widgetSys.innerText="⚡ system active"
 },1000)
 
 /* LOGIN */
@@ -172,7 +259,7 @@ document.querySelectorAll(".window").forEach(x=>x.classList.remove("active"))
 w.classList.add("active")
 }
 
-/* WINDOW CONTROL */
+/* WINDOW */
 function openApp(id){
 let w=document.getElementById(id)
 w.style.display="flex"
@@ -188,12 +275,10 @@ setTimeout(()=>w.style.display="none",200)
 setActive(id,false)
 }
 
-function closeApp(id){
-minimize(id)
-}
+function closeApp(id){minimize(id)}
 
 /* TASKBAR */
-const apps=["files","notes","todo","music","playlist","game","search"]
+const apps=["files","notes","todo","music","playlist","game","search","settings"]
 
 function initTaskbar(){
 apps.forEach(id=>{
@@ -206,12 +291,32 @@ tasks.appendChild(t)
 })
 }
 
-function setActive(id,state){
-let t=document.getElementById("task-"+id)
-if(t) t.classList.toggle("active",state)
+/* START MENU */
+document.querySelector(".start").onclick=()=>{
+startMenu.style.display=
+startMenu.style.display==="block"?"none":"block"
 }
 
-/* DRAG WINDOW */
+function buildStartMenu(){
+apps.forEach(a=>{
+let d=document.createElement("div")
+d.className="start-item"
+d.innerText=a
+d.onclick=()=>openApp(a)
+startMenu.appendChild(d)
+})
+}
+
+/* NOTIFY */
+function notify(text){
+let n=document.createElement("div")
+n.className="notif"
+n.innerText=text
+notifications.appendChild(n)
+setTimeout(()=>n.remove(),3000)
+}
+
+/* DRAG */
 function drag(win){
 let bar=win.querySelector(".titlebar")
 let is=false,x,y
@@ -232,6 +337,19 @@ win.style.top=e.clientY-y+"px"
 
 document.onmouseup=()=>is=false
 }
+
+/* SNAP */
+document.addEventListener("mouseup",()=>{
+document.querySelectorAll(".window").forEach(w=>{
+let r=w.getBoundingClientRect()
+if(r.top<10){
+w.style.top="0"
+w.style.left="0"
+w.style.width="100%"
+w.style.height="calc(100% - 48px)"
+}
+})
+})
 
 /* WINDOW CREATE */
 function createWindow(id,title,html){
@@ -265,15 +383,13 @@ d.ondblclick=()=>openApp(id)
 desktop.appendChild(d)
 }
 
-/* FILE SYSTEM */
-let fs=JSON.parse(localStorage.getItem("fs")||"null")||{name:"root",folders:[],files:[]}
-let current=fs
-
+/* FILES */
+let fs=JSON.parse(localStorage.getItem("fs")||"null")||{files:[]}
 function saveFS(){localStorage.setItem("fs",JSON.stringify(fs))}
 
 function renderFS(){
-explorer.innerHTML="<b>"+current.name+"</b><br><br>"
-current.files.forEach(f=>{
+explorer.innerHTML=""
+fs.files.forEach(f=>{
 let d=document.createElement("div")
 d.innerText="📄 "+f.name
 d.onclick=()=>openFile(f)
@@ -282,9 +398,9 @@ explorer.appendChild(d)
 }
 
 function newFile(){
-let n=prompt("nome arquivo")
+let n=prompt("nome")
 if(!n)return
-current.files.push({name:n,content:""})
+fs.files.push({name:n,content:""})
 saveFS();renderFS()
 }
 
@@ -311,7 +427,6 @@ localStorage.setItem("todo",JSON.stringify(list))
 renderTodo()
 todoInput.value=""
 }
-
 function renderTodo(){
 let list=JSON.parse(localStorage.getItem("todo")||"[]")
 todoList.innerHTML=""
@@ -348,6 +463,8 @@ gameScore.innerText="score "+score
 function init(){
 
 initTaskbar()
+buildStartMenu()
+notify("Seven OS iniciado")
 
 icon("📁<br>files","files",20,20)
 icon("📝<br>notes","notes",20,110)
@@ -356,6 +473,7 @@ icon("🎧<br>music","music",120,20)
 icon("🎵<br>playlist","playlist",120,110)
 icon("🎮<br>game","game",120,200)
 icon("🔍<br>search","search",220,20)
+icon("⚙<br>settings","settings",220,110)
 
 /* WINDOWS */
 
@@ -396,7 +514,12 @@ createWindow("search","search.exe",`
 <div id="searchResults"></div>
 `)
 
-/* INIT RENDERS */
+createWindow("settings","settings.exe",`
+<h3>⚙ settings</h3>
+<button onclick="setTheme('dark')">🌙 tema escuro</button>
+<button onclick="setTheme('light')">☀ tema claro</button>
+`)
+
 renderFS()
 renderTodo()
 
