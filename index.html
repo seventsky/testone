@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v22.1</title>
+<title>Seven OS v23</title>
 
 <style>
 :root{
@@ -13,7 +13,6 @@
 --accent:#00ff9f;
 }
 
-/* LIGHT */
 .light{
 --bg:#e5e7eb;
 --bg2:#cbd5e1;
@@ -22,7 +21,6 @@
 --accent:#0f172a;
 }
 
-/* BODY FIX */
 body{
 margin:0;
 font-family:"Segoe UI", monospace;
@@ -31,15 +29,14 @@ color:var(--text);
 overflow:hidden;
 }
 
-/* WALLPAPER FIX */
 .wallpaper-1{background:#000}
 .wallpaper-2{background:linear-gradient(135deg,#020617,#000)}
 .wallpaper-3{background:radial-gradient(circle,#001f1a,#000)}
 
-/* LOGIN */
 #login{
 position:fixed;
-width:100%;height:100%;
+width:100%;
+height:100%;
 background:#000;
 display:flex;
 align-items:center;
@@ -49,14 +46,12 @@ cursor:pointer;
 font-size:22px;
 }
 
-/* DESKTOP */
 .desktop{
 position:absolute;
 width:100%;
 height:calc(100% - 48px);
 }
 
-/* ICON */
 .icon{
 width:80px;
 position:absolute;
@@ -65,13 +60,13 @@ cursor:pointer;
 padding:6px;
 border-radius:8px;
 transition:.2s;
+user-select:none;
 }
 .icon:hover{
 background:rgba(255,255,255,0.05);
 transform:scale(1.05);
 }
 
-/* TASKBAR */
 .taskbar{
 position:fixed;
 bottom:0;
@@ -101,7 +96,6 @@ border-radius:6px;
 
 .clock{margin-left:auto}
 
-/* WINDOW */
 .window{
 position:absolute;
 width:480px;
@@ -119,7 +113,7 @@ transition:.2s;
 }
 
 .window.active{
-box-shadow:0 0 20px rgba(0,255,150,0.3);
+box-shadow:0 0 25px rgba(0,255,150,0.35);
 }
 
 .titlebar{
@@ -130,79 +124,26 @@ justify-content:space-between;
 cursor:move;
 }
 
-.controls span{
-margin-left:8px;
-cursor:pointer;
-}
-
-.content{flex:1;padding:10px;overflow:auto}
-
-/* START MENU */
-.start-menu{
-position:fixed;
-bottom:60px;
-left:10px;
-width:240px;
-background:#111;
-border-radius:10px;
-display:none;
+.content{
+flex:1;
 padding:10px;
+overflow:auto;
 }
 
-.start-item{
-padding:8px;
-cursor:pointer;
-}
-.start-item:hover{background:rgba(0,255,150,0.1)}
-
-/* NOTIFICATIONS */
-.notifications{
-position:fixed;
-right:10px;
-bottom:60px;
-width:220px;
-}
-.notif{
-background:#111;
-padding:8px;
-margin-top:6px;
-border-radius:6px;
-}
-
-/* WIDGETS */
-.widgets{
-position:fixed;
-top:10px;
-right:10px;
-display:flex;
-flex-direction:column;
-gap:10px;
-}
-
-.widget{
-background:#111;
-padding:10px;
-border-radius:8px;
-}
-
-/* UI */
 button,input,textarea{
 background:#000;
 color:var(--accent);
 border:none;
-padding:5px;
+padding:6px;
 width:100%;
 margin-bottom:5px;
 }
 
-.todo{background:#111;padding:5px;margin:3px 0;cursor:pointer}
-.done{opacity:.5;text-decoration:line-through}
-
 .preview{
-background:#000;
-padding:10px;
 margin-top:10px;
+padding:8px;
 border:1px solid var(--accent);
+background:#000;
 }
 </style>
 </head>
@@ -219,215 +160,195 @@ border:1px solid var(--accent);
 <div class="clock" id="clock"></div>
 </div>
 
-<div class="start-menu" id="startMenu"></div>
-<div class="notifications" id="notifications"></div>
-
-<div class="widgets">
-<div class="widget" id="widgetClock"></div>
-<div class="widget" id="widgetSys"></div>
-</div>
-
 <script>
 
-/* THEME FIX */
-function setTheme(mode){
-if(mode==="light"){
-document.body.classList.add("light")
-localStorage.setItem("theme","light")
-}else{
-document.body.classList.remove("light")
-localStorage.setItem("theme","dark")
-}
+/* ===================== CORE ===================== */
+
+let z=1;
+
+function focus(w){
+z++;
+w.style.zIndex=z;
+document.querySelectorAll(".window").forEach(x=>x.classList.remove("active"));
+w.classList.add("active");
 }
 
-(function(){
-let saved=localStorage.getItem("theme")
-if(saved==="light") setTheme("light")
-})()
-
-/* WALLPAPER */
-function setWallpaper(n){
-document.body.classList.remove("wallpaper-1","wallpaper-2","wallpaper-3")
-document.body.classList.add("wallpaper-"+n)
-localStorage.setItem("wallpaper",n)
-}
-(function(){
-setWallpaper(localStorage.getItem("wallpaper")||1)
-})()
-
-/* SOUND */
-function playSound(){
-let a=new Audio("https://www.soundjay.com/buttons/sounds/button-16.mp3")
-a.volume=0.2
-a.play()
+/* LOGIN */
+function enter(){
+login.style.display="none";
+init();
 }
 
 /* CLOCK */
 setInterval(()=>{
-clock.innerText=new Date().toLocaleTimeString().slice(0,5)
-widgetClock.innerText="🕒 "+clock.innerText
-widgetSys.innerText="⚡ system active"
-},1000)
+clock.innerText=new Date().toLocaleTimeString().slice(0,5);
+},1000);
 
-/* LOGIN */
-function enter(){
-login.style.display="none"
-init()
+/* ===================== SOUND ===================== */
+
+function clickSound(){
+let a=new Audio("https://www.soundjay.com/buttons/sounds/button-16.mp3");
+a.volume=0.2;
+a.play();
 }
 
-/* SYSTEM */
-let z=1
-function focus(w){
-z++
-w.style.zIndex=z
-document.querySelectorAll(".window").forEach(x=>x.classList.remove("active"))
-w.classList.add("active")
+/* ===================== THEME ===================== */
+
+function setTheme(m){
+if(m==="light") document.body.classList.add("light");
+else document.body.classList.remove("light");
+localStorage.setItem("theme",m);
 }
 
-/* WINDOW */
-function openApp(id){
-playSound()
-let w=document.getElementById(id)
-w.style.display="flex"
-setTimeout(()=>w.style.opacity=1,10)
-focus(w)
+(function(){
+if(localStorage.getItem("theme")==="light"){
+document.body.classList.add("light");
+}
+})();
+
+/* ===================== WALLPAPER ===================== */
+
+function setWallpaper(n){
+document.body.className="wallpaper-"+n;
+localStorage.setItem("wallpaper",n);
 }
 
-function minimize(id){
-let w=document.getElementById(id)
-w.style.opacity=0
-setTimeout(()=>w.style.display="none",200)
-}
+(function(){
+setWallpaper(localStorage.getItem("wallpaper")||1);
+})();
 
-function closeApp(id){minimize(id)}
+/* ===================== WINDOW SYSTEM ===================== */
 
-/* TASKBAR */
-const apps=["files","notes","todo","music","playlist","game","search","settings"]
-
-function initTaskbar(){
-apps.forEach(id=>{
-let t=document.createElement("div")
-t.className="task"
-t.innerText=id
-t.onclick=()=>openApp(id)
-tasks.appendChild(t)
-})
-}
-
-/* START MENU */
-document.querySelector(".start").onclick=()=>{
-startMenu.style.display=
-startMenu.style.display==="block"?"none":"block"
-}
-
-function buildStartMenu(){
-apps.forEach(a=>{
-let d=document.createElement("div")
-d.className="start-item"
-d.innerText=a
-d.onclick=()=>openApp(a)
-startMenu.appendChild(d)
-})
-}
-
-/* NOTIFY */
-function notify(text){
-let n=document.createElement("div")
-n.className="notif"
-n.innerText=text
-notifications.appendChild(n)
-setTimeout(()=>n.remove(),3000)
-}
-
-/* DRAG */
-function drag(win){
-let bar=win.querySelector(".titlebar")
-let is=false,x,y
-
-bar.onmousedown=e=>{
-is=true
-x=e.clientX-win.offsetLeft
-y=e.clientY-win.offsetTop
-focus(win)
-}
-
-document.onmousemove=e=>{
-if(is){
-win.style.left=e.clientX-x+"px"
-win.style.top=e.clientY-y+"px"
-}
-}
-
-document.onmouseup=()=>is=false
-}
-
-/* CREATE WINDOW FIX */
 function createWindow(id,title,html){
-let w=document.createElement("div")
-w.className="window"
-w.id=id
 
-w.style.left=(window.innerWidth/2-240)+"px"
-w.style.top=(window.innerHeight/2-160)+"px"
+let w=document.createElement("div");
+w.className="window";
+w.id=id;
+
+w.style.left=(window.innerWidth/2-240)+"px";
+w.style.top=(window.innerHeight/2-160)+"px";
 
 w.innerHTML=`
 <div class="titlebar">
 ${title}
-<div class="controls">
-<span onclick="minimize('${id}')">—</span>
-<span onclick="closeApp('${id}')">✕</span>
+<div>
+<span onclick="min('${id}')">—</span>
+<span onclick="closeW('${id}')">✕</span>
 </div>
 </div>
 <div class="content">${html}</div>
-`
+`;
 
-document.body.appendChild(w)
-drag(w)
+document.body.appendChild(w);
+drag(w);
 }
 
-/* ICON */
-function icon(name,id,x,y){
-let d=document.createElement("div")
-d.className="icon"
-d.innerHTML=name
-d.style.left=x+"px"
-d.style.top=y+"px"
-d.ondblclick=()=>openApp(id)
-desktop.appendChild(d)
+function openApp(id){
+clickSound();
+let w=document.getElementById(id);
+w.style.display="flex";
+setTimeout(()=>w.style.opacity=1,10);
+focus(w);
 }
 
-/* INIT */
+function min(id){
+let w=document.getElementById(id);
+w.style.opacity=0;
+setTimeout(()=>w.style.display="none",200);
+}
+
+function closeW(id){min(id);}
+
+/* DRAG */
+function drag(win){
+let bar=win.querySelector(".titlebar");
+let active=false,x=0,y=0;
+
+bar.onmousedown=e=>{
+active=true;
+x=e.clientX-win.offsetLeft;
+y=e.clientY-win.offsetTop;
+focus(win);
+};
+
+document.onmousemove=e=>{
+if(active){
+win.style.left=e.clientX-x+"px";
+win.style.top=e.clientY-y+"px";
+}
+};
+
+document.onmouseup=()=>active=false;
+}
+
+/* ===================== GAME v23 UPGRADE ===================== */
+
+let gameScore = parseInt(localStorage.getItem("gameScore")||"0");
+
+function gameClick(){
+gameScore++;
+localStorage.setItem("gameScore",gameScore);
+document.getElementById("gameScore").innerText="score: "+gameScore;
+}
+
+function gameReset(){
+gameScore=0;
+localStorage.setItem("gameScore",0);
+document.getElementById("gameScore").innerText="score: 0";
+}
+
+/* ===================== INIT ===================== */
+
 function init(){
 
-initTaskbar()
-buildStartMenu()
-notify("Seven OS iniciado")
+createWindow("files","files.exe",`📄 system.log`);
 
-icon("📁<br>files","files",20,20)
-icon("📝<br>notes","notes",20,110)
-icon("📋<br>todo","todo",20,200)
-icon("🎧<br>music","music",120,20)
-icon("🎵<br>playlist","playlist",120,110)
-icon("🎮<br>game","game",120,200)
-icon("🔍<br>search","search",220,20)
-icon("⚙<br>settings","settings",220,110)
+createWindow("notes","notes.exe",`
+<textarea id="note"></textarea>
+<div id="preview"></div>
+`);
 
-/* WINDOWS */
+createWindow("todo","todo.exe",`
+<input placeholder="task">
+<button>add</button>
+`);
 
-createWindow("files","files.exe",`<button>+ arquivo</button>`)
-createWindow("notes","notes.exe",`<textarea></textarea><div id="preview"></div>`)
-createWindow("todo","todo.exe",`<input><button>add</button>`)
-createWindow("music","music.exe",`🎧 forfun<br>🌑 xamã<br>☁ mac miller`)
-createWindow("playlist","playlist.exe",`<iframe width="100%" height="200" src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>`)
-createWindow("game","game.exe",`<button>click</button>`)
-createWindow("search","search.exe",`<input placeholder="buscar...">`)
+createWindow("music","music.exe",`
+🎧 forfun<br>🌑 xamã<br>☁ mac miller<br>⚡ mgk<br>🌙 sleep token
+`);
+
+createWindow("playlist","playlist.exe",`
+<iframe width="100%" height="180"
+src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>
+`);
+
+createWindow("game","game.exe",`
+<div style="text-align:center">
+<h3>🎮 click system v23</h3>
+
+<button onclick="gameClick()">CLICK</button>
+
+<div id="gameScore">score: ${gameScore}</div>
+
+<button onclick="gameReset()">reset</button>
+</div>
+`);
+
+createWindow("search","search.exe",`
+<input placeholder="search system">
+<div>no results</div>
+`);
+
 createWindow("settings","settings.exe",`
-<button onclick="setTheme('dark')">🌙 escuro</button>
-<button onclick="setTheme('light')">☀ claro</button>
+<h3>settings</h3>
+
+<button onclick="setTheme('dark')">🌙 dark</button>
+<button onclick="setTheme('light')">☀ light</button>
+
 <button onclick="setWallpaper(1)">wall 1</button>
 <button onclick="setWallpaper(2)">wall 2</button>
 <button onclick="setWallpaper(3)">wall 3</button>
-`)
+`);
 
 }
 
