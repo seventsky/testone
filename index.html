@@ -2,23 +2,14 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v23</title>
+<title>Seven OS v23 FULL</title>
 
 <style>
 :root{
 --bg:#05070a;
---bg2:#0f1722;
 --panel:#0b0f14;
 --text:#d1d5db;
 --accent:#00ff9f;
-}
-
-.light{
---bg:#e5e7eb;
---bg2:#cbd5e1;
---panel:#ffffff;
---text:#111;
---accent:#0f172a;
 }
 
 body{
@@ -29,10 +20,7 @@ color:var(--text);
 overflow:hidden;
 }
 
-.wallpaper-1{background:#000}
-.wallpaper-2{background:linear-gradient(135deg,#020617,#000)}
-.wallpaper-3{background:radial-gradient(circle,#001f1a,#000)}
-
+/* LOGIN */
 #login{
 position:fixed;
 width:100%;
@@ -41,17 +29,19 @@ background:#000;
 display:flex;
 align-items:center;
 justify-content:center;
-z-index:9999;
-cursor:pointer;
 font-size:22px;
+cursor:pointer;
+z-index:9999;
 }
 
+/* DESKTOP */
 .desktop{
 position:absolute;
 width:100%;
 height:calc(100% - 48px);
 }
 
+/* ICONS */
 .icon{
 width:80px;
 position:absolute;
@@ -59,27 +49,21 @@ text-align:center;
 cursor:pointer;
 padding:6px;
 border-radius:8px;
-transition:.2s;
 user-select:none;
 }
-.icon:hover{
-background:rgba(255,255,255,0.05);
-transform:scale(1.05);
-}
+.icon:hover{background:rgba(255,255,255,0.05)}
 
+/* TASKBAR */
 .taskbar{
 position:fixed;
 bottom:0;
 width:100%;
 height:48px;
-background:rgba(10,15,20,0.85);
+background:#0a0f14;
 display:flex;
 align-items:center;
 padding:0 10px;
-backdrop-filter:blur(10px);
 }
-
-.start{cursor:pointer;padding:6px}
 
 .tasks{
 display:flex;
@@ -89,31 +73,24 @@ margin-left:10px;
 
 .task{
 padding:6px 10px;
-cursor:pointer;
 border-radius:6px;
+cursor:pointer;
 }
-.task.active{background:rgba(0,255,150,0.2)}
+.task.active{background:#00ff9f33}
 
-.clock{margin-left:auto}
-
+/* WINDOW SYSTEM */
 .window{
 position:absolute;
-width:480px;
-height:320px;
+width:500px;
+height:340px;
 background:var(--panel);
-border:1px solid rgba(0,255,150,0.2);
+border:1px solid #00ff9f33;
 border-radius:10px;
 display:none;
 flex-direction:column;
-resize:both;
 overflow:hidden;
+resize:both;
 box-shadow:0 10px 30px rgba(0,0,0,0.6);
-opacity:0;
-transition:.2s;
-}
-
-.window.active{
-box-shadow:0 0 25px rgba(0,255,150,0.35);
 }
 
 .titlebar{
@@ -139,39 +116,59 @@ width:100%;
 margin-bottom:5px;
 }
 
+/* PREVIEW */
 .preview{
-margin-top:10px;
 padding:8px;
+margin-top:8px;
 border:1px solid var(--accent);
 background:#000;
 }
+
+/* START MENU */
+.start-menu{
+position:fixed;
+bottom:60px;
+left:10px;
+width:200px;
+background:#111;
+padding:10px;
+display:none;
+border-radius:8px;
+}
+
+.start-item{
+padding:6px;
+cursor:pointer;
+}
+.start-item:hover{background:#00ff9f22}
 </style>
 </head>
 
-<body class="wallpaper-1">
+<body>
 
 <div id="login" onclick="enter()">🌌 constelação</div>
 
 <div class="desktop" id="desktop"></div>
 
 <div class="taskbar">
-<div class="start">◼</div>
+<div class="start" onclick="toggleStart()">◼</div>
 <div class="tasks" id="tasks"></div>
-<div class="clock" id="clock"></div>
+<div id="clock"></div>
 </div>
+
+<div class="start-menu" id="startMenu"></div>
 
 <script>
 
-/* ===================== CORE ===================== */
+/* ================= CORE ================= */
 
 let z=1;
+let apps=["files","notes","todo","music","playlist","game","search","settings"];
 
-function focus(w){
-z++;
-w.style.zIndex=z;
-document.querySelectorAll(".window").forEach(x=>x.classList.remove("active"));
-w.classList.add("active");
-}
+/* CLOCK */
+setInterval(()=>{
+clock.innerText=new Date().toLocaleTimeString().slice(0,5);
+},1000);
 
 /* LOGIN */
 function enter(){
@@ -179,45 +176,7 @@ login.style.display="none";
 init();
 }
 
-/* CLOCK */
-setInterval(()=>{
-clock.innerText=new Date().toLocaleTimeString().slice(0,5);
-},1000);
-
-/* ===================== SOUND ===================== */
-
-function clickSound(){
-let a=new Audio("https://www.soundjay.com/buttons/sounds/button-16.mp3");
-a.volume=0.2;
-a.play();
-}
-
-/* ===================== THEME ===================== */
-
-function setTheme(m){
-if(m==="light") document.body.classList.add("light");
-else document.body.classList.remove("light");
-localStorage.setItem("theme",m);
-}
-
-(function(){
-if(localStorage.getItem("theme")==="light"){
-document.body.classList.add("light");
-}
-})();
-
-/* ===================== WALLPAPER ===================== */
-
-function setWallpaper(n){
-document.body.className="wallpaper-"+n;
-localStorage.setItem("wallpaper",n);
-}
-
-(function(){
-setWallpaper(localStorage.getItem("wallpaper")||1);
-})();
-
-/* ===================== WINDOW SYSTEM ===================== */
+/* ================= WINDOW ================= */
 
 function createWindow(id,title,html){
 
@@ -225,12 +184,11 @@ let w=document.createElement("div");
 w.className="window";
 w.id=id;
 
-w.style.left=(window.innerWidth/2-240)+"px";
-w.style.top=(window.innerHeight/2-160)+"px";
+w.style.left=(window.innerWidth/2-250)+"px";
+w.style.top=(window.innerHeight/2-170)+"px";
 
 w.innerHTML=`
-<div class="titlebar">
-${title}
+<div class="titlebar">${title}
 <div>
 <span onclick="min('${id}')">—</span>
 <span onclick="closeW('${id}')">✕</span>
@@ -244,20 +202,21 @@ drag(w);
 }
 
 function openApp(id){
-clickSound();
 let w=document.getElementById(id);
 w.style.display="flex";
-setTimeout(()=>w.style.opacity=1,10);
 focus(w);
 }
 
 function min(id){
-let w=document.getElementById(id);
-w.style.opacity=0;
-setTimeout(()=>w.style.display="none",200);
+document.getElementById(id).style.display="none";
 }
 
 function closeW(id){min(id);}
+
+function focus(w){
+z++;
+w.style.zIndex=z;
+}
 
 /* DRAG */
 function drag(win){
@@ -281,73 +240,92 @@ win.style.top=e.clientY-y+"px";
 document.onmouseup=()=>active=false;
 }
 
-/* ===================== GAME v23 UPGRADE ===================== */
+/* ================= TASKBAR ================= */
 
-let gameScore = parseInt(localStorage.getItem("gameScore")||"0");
-
-function gameClick(){
-gameScore++;
-localStorage.setItem("gameScore",gameScore);
-document.getElementById("gameScore").innerText="score: "+gameScore;
+function initTaskbar(){
+apps.forEach(a=>{
+let t=document.createElement("div");
+t.className="task";
+t.innerText=a;
+t.onclick=()=>openApp(a);
+tasks.appendChild(t);
+});
 }
 
-function gameReset(){
-gameScore=0;
-localStorage.setItem("gameScore",0);
-document.getElementById("gameScore").innerText="score: 0";
+/* ================= START ================= */
+
+function toggleStart(){
+startMenu.style.display=
+startMenu.style.display==="block"?"none":"block";
 }
 
-/* ===================== INIT ===================== */
+/* ================= GAME ================= */
+
+let score=parseInt(localStorage.getItem("score")||"0");
+
+function addScore(){
+score++;
+localStorage.setItem("score",score);
+document.getElementById("score").innerText="score: "+score;
+}
+
+/* ================= INIT ================= */
 
 function init(){
 
-createWindow("files","files.exe",`📄 system.log`);
+initTaskbar();
 
-createWindow("notes","notes.exe",`
-<textarea id="note"></textarea>
-<div id="preview"></div>
+/* FILES */
+createWindow("files","files.exe",`
+📁 system.log<br>
+📁 memory.dat
 `);
 
+/* NOTES */
+createWindow("notes","notes.exe",`
+<textarea id="note"></textarea>
+<div class="preview"></div>
+`);
+
+/* TODO */
 createWindow("todo","todo.exe",`
 <input placeholder="task">
 <button>add</button>
 `);
 
+/* MUSIC */
 createWindow("music","music.exe",`
-🎧 forfun<br>🌑 xamã<br>☁ mac miller<br>⚡ mgk<br>🌙 sleep token
+🎧 forfun<br>
+🌑 xamã<br>
+☁ mac miller<br>
+⚡ mgk<br>
+🌙 sleep token
 `);
 
+/* PLAYLIST */
 createWindow("playlist","playlist.exe",`
 <iframe width="100%" height="180"
 src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>
 `);
 
+/* GAME */
 createWindow("game","game.exe",`
-<div style="text-align:center">
-<h3>🎮 click system v23</h3>
-
-<button onclick="gameClick()">CLICK</button>
-
-<div id="gameScore">score: ${gameScore}</div>
-
-<button onclick="gameReset()">reset</button>
-</div>
+<h3>🎮 click system</h3>
+<button onclick="addScore()">CLICK</button>
+<div id="score">score: ${score}</div>
 `);
 
+/* SEARCH */
 createWindow("search","search.exe",`
 <input placeholder="search system">
 <div>no results</div>
 `);
 
+/* SETTINGS */
 createWindow("settings","settings.exe",`
 <h3>settings</h3>
-
-<button onclick="setTheme('dark')">🌙 dark</button>
-<button onclick="setTheme('light')">☀ light</button>
-
-<button onclick="setWallpaper(1)">wall 1</button>
-<button onclick="setWallpaper(2)">wall 2</button>
-<button onclick="setWallpaper(3)">wall 3</button>
+<button onclick="document.body.style.background='#000'">dark</button>
+<button onclick="document.body.style.background='#111'">gray</button>
 `);
 
 }
