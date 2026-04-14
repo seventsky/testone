@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v24.4</title>
+<title>Seven OS v24.5</title>
 
 <style>
 body{
@@ -156,7 +156,7 @@ login.style.display="none";
 init();
 }
 
-/* ================= WINDOW ENGINE ================= */
+/* ================= WINDOW ================= */
 
 function createWindow(app){
 
@@ -222,7 +222,7 @@ Z++;
 w.style.zIndex=Z;
 }
 
-/* ================= DRAG FIX ================= */
+/* ================= DRAG ================= */
 
 function drag(win){
 let bar=win.querySelector(".titlebar");
@@ -245,21 +245,69 @@ win.style.top=(e.clientY-y)+"px";
 document.onmouseup=()=>active=false;
 }
 
-/* ================= TASKBAR ================= */
+/* ================= TASKBAR UPGRADE ================= */
 
-function buildTaskbar(){
-let t=document.getElementById("tasks");
+function upgradeTaskbar(){
 
-Object.values(APP_REGISTRY).forEach(app=>{
-let b=document.createElement("div");
-b.className="task";
-b.innerText=app.icon;
-b.onclick=()=>openApp(app.id);
-t.appendChild(b);
+let tasks=document.querySelector(".tasks");
+if(!tasks) return;
+
+document.querySelectorAll(".task").forEach(t=>{
+t.style.width="38px";
+t.style.height="38px";
+t.style.display="flex";
+t.style.alignItems="center";
+t.style.justifyContent="center";
+t.style.border="1px solid rgba(0,255,150,0.15)";
+t.style.borderRadius="6px";
+t.style.transition=".2s";
+
+t.onmouseenter=()=>{
+t.style.background="rgba(0,255,150,0.15)";
+t.style.transform="scale(1.1)";
+};
+
+t.onmouseleave=()=>{
+t.style.background="#111";
+t.style.transform="scale(1)";
+};
+
 });
+
 }
 
-/* ================= SEARCH (RESTAURADO COMPLETO) ================= */
+/* ================= FILES UPGRADE ================= */
+
+function upgradeFiles(){
+
+let files=document.getElementById("files");
+if(!files) return;
+
+let items=files.querySelectorAll(".content div");
+
+items.forEach(item=>{
+
+item.style.padding="6px";
+item.style.cursor="pointer";
+
+item.onmouseenter=()=>{
+item.style.background="rgba(0,255,150,0.15)";
+};
+
+item.onmouseleave=()=>{
+item.style.background="transparent";
+};
+
+item.onclick=()=>{
+items.forEach(i=>i.style.background="transparent");
+item.style.background="rgba(0,255,150,0.25)";
+};
+
+});
+
+}
+
+/* ================= SEARCH HACK (MANTIDO + GARANTIDO) ================= */
 
 function searchHack(){
 
@@ -277,12 +325,11 @@ let w=document.getElementById("search");
 
 if(!w) return;
 
-/* 👾 HACKED MODE RESTAURADO */
 w.querySelector(".content").innerHTML=`
 <div style="text-align:center;padding:20px">
 <div style="font-size:40px">👾</div>
 <h2>SISTEMA INVADIDO</h2>
-<p>query: ${val}</p>
+<p>${val}</p>
 </div>
 `;
 
@@ -292,29 +339,27 @@ w.querySelector(".content").innerHTML=`
 
 }
 
-/* ================= CRYPTO ================= */
-
-function encode(t){
-return btoa(unescape(encodeURIComponent(t)));
-}
-
-function decode(t){
-try{return decodeURIComponent(escape(atob(t)))}
-catch(e){return "erro decode"}
-}
-
 /* ================= INIT ================= */
 
 function init(){
 
-buildTaskbar();
+FILES=[
+{name:"memory.log",content:"system active"},
+{name:"core.dat",content:"constelação layer"},
+{name:"user.sys",content:"locked profile"},
+{name:"boot.sec",content:"secure boot active"}
+];
 
 /* FILES */
 registerApp({
 id:"files",
 title:"files.exe",
 icon:"📁",
-content:`📁 system.log<br>📁 memory.dat<br>📁 core.dat`
+content:`
+<h3>FILES SYSTEM</h3>
+${FILES.map(f=>`<div onclick="openFile('${f.name}')">📄 ${f.name}</div>`).join("")}
+<textarea id="fileView"></textarea>
+`
 });
 
 /* NOTES */
@@ -325,13 +370,12 @@ icon:"📝",
 content:`<textarea></textarea>`
 });
 
-/* SECRETS (CRIPTO MANTIDO) */
+/* SECRETS */
 registerApp({
 id:"secrets",
 title:"secrets.exe",
 icon:"🔐",
 content:`
-<h3>somente em criptografia</h3>
 <textarea id="sec"></textarea>
 <button onclick="out.innerText=encode(sec.value)">encode</button>
 <button onclick="out.innerText=decode(sec.value)">decode</button>
@@ -344,7 +388,7 @@ registerApp({
 id:"music",
 title:"music.exe",
 icon:"🎧",
-content:`forfun<br>xamã<br>mac miller<br>mgk<br>sleep token`
+content:`forfun<br>xamã<br>mac miller`
 });
 
 /* PLAYLIST */
@@ -389,16 +433,25 @@ createWindow(app);
 createIcon(app);
 });
 
-/* SEARCH PATCH ACTIVO */
+/* PATCHES ATIVADOS */
+setTimeout(()=>{
+upgradeFiles();
+upgradeTaskbar();
 searchHack();
+},500);
 
 }
 
+/* GAME */
 let c=0;
 function add(){
 c++;
 document.getElementById("g").innerText=c;
 }
+
+/* CRYPTO */
+function encode(t){return btoa(unescape(encodeURIComponent(t)))}
+function decode(t){try{return decodeURIComponent(escape(atob(t)))}catch(e){return "erro"}}
 
 </script>
 
