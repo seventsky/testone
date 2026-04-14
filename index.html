@@ -1,172 +1,19 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-<meta charset="UTF-8">
-<title>Seven OS v24.1</title>
-
-<style>
-:root{
---bg:#05070a;
---panel:#0b0f14;
---text:#d1d5db;
---accent:#00ff9f;
-}
-
-body{
-margin:0;
-font-family:Segoe UI, monospace;
-background:#000;
-color:var(--text);
-overflow:hidden;
-}
-
-/* LOGIN */
-#login{
-position:fixed;
-inset:0;
-display:flex;
-align-items:center;
-justify-content:center;
-background:#000;
-font-size:22px;
-cursor:pointer;
-z-index:99999;
-}
-
-/* =========================
-   DESKTOP (FIX REAL)
-========================= */
-#desktop{
-position:absolute;
-inset:0 0 48px 0;
-display:grid;
-grid-template-columns:repeat(auto-fill,90px);
-gap:14px;
-padding:20px;
-align-content:start;
-}
-
-/* ICONS */
-.icon{
-width:80px;
-height:80px;
-position:relative;
-text-align:center;
-cursor:pointer;
-padding:10px;
-border-radius:10px;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-transition:.2s;
-user-select:none;
-}
-
-.icon:hover{
-background:rgba(0,255,150,0.08);
-transform:scale(1.05);
-box-shadow:0 0 10px rgba(0,255,150,0.2);
-}
-
-.icon span{
-font-size:28px;
-}
-
-/* TASKBAR */
-.taskbar{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-height:48px;
-background:#0a0f14;
-display:flex;
-align-items:center;
-padding:0 10px;
-}
-
-.tasks{
-display:flex;
-gap:6px;
-margin-left:10px;
-}
-
-.task{
-padding:6px 10px;
-border-radius:6px;
-cursor:pointer;
-background:#111;
-}
-.task.active{background:#00ff9f33}
-
-#clock{margin-left:auto}
-
-/* WINDOW SYSTEM */
-.window{
-position:absolute;
-width:480px;
-height:320px;
-background:var(--panel);
-border:1px solid #00ff9f33;
-border-radius:10px;
-display:none;
-flex-direction:column;
-overflow:hidden;
-resize:both;
-}
-
-.titlebar{
-background:#111;
-padding:6px;
-display:flex;
-justify-content:space-between;
-cursor:move;
-user-select:none;
-}
-
-.content{
-flex:1;
-padding:10px;
-overflow:auto;
-}
-
-button,input,textarea{
-background:#000;
-color:var(--accent);
-border:none;
-padding:6px;
-width:100%;
-margin-bottom:5px;
-}
-</style>
-</head>
-
-<body>
-
-<div id="login" onclick="boot()">🌌 constelação</div>
-
-<div id="desktop"></div>
-
-<div class="taskbar">
-<div class="start">◼</div>
-<div class="tasks" id="tasks"></div>
-<div id="clock"></div>
-</div>
-
 <script>
 
 /* ================= CORE ================= */
 
 let Z=1;
 let APP_REGISTRY={};
+let ACTIVE_APP=null;
 
-/* CLOCK */
+/* ================= CLOCK ================= */
+
 setInterval(()=>{
 clock.innerText=new Date().toLocaleTimeString().slice(0,5);
 },1000);
 
-/* LOGIN */
+/* ================= LOGIN ================= */
+
 function boot(){
 login.style.display="none";
 init();
@@ -191,6 +38,7 @@ ${app.title}
 <span onclick="closeW('${app.id}')">✕</span>
 </div>
 </div>
+
 <div class="content">${app.content}</div>
 `;
 
@@ -198,7 +46,7 @@ document.body.appendChild(w);
 drag(w);
 }
 
-/* ================= ICON SYSTEM (FIX VISUAL) ================= */
+/* ================= ICON SYSTEM ================= */
 
 function createIcon(app){
 let d=document.createElement("div");
@@ -213,7 +61,7 @@ d.onclick=()=>openApp(app.id);
 desktop.appendChild(d);
 }
 
-/* ================= APP SYSTEM ================= */
+/* ================= APP REGISTRY ================= */
 
 function registerApp(app){
 APP_REGISTRY[app.id]=app;
@@ -223,10 +71,10 @@ APP_REGISTRY[app.id]=app;
 
 function openApp(id){
 let w=document.getElementById(id);
-if(w){
+if(!w) return;
 w.style.display="flex";
 focus(w);
-}
+setActiveTask(id);
 }
 
 function min(id){
@@ -235,6 +83,27 @@ if(w) w.style.display="none";
 }
 
 function closeW(id){min(id);}
+
+/* ================= TASKBAR (IMPROVED) ================= */
+
+function buildTaskbar(){
+let t=document.getElementById("tasks");
+
+Object.keys(APP_REGISTRY).forEach(id=>{
+let b=document.createElement("div");
+b.className="task";
+b.innerText=APP_REGISTRY[id].icon;
+
+b.onclick=()=>openApp(id);
+
+t.appendChild(b);
+});
+}
+
+function setActiveTask(id){
+document.querySelectorAll(".task").forEach(t=>t.classList.remove("active"));
+ACTIVE_APP=id;
+}
 
 /* ================= FOCUS ================= */
 
@@ -266,25 +135,35 @@ win.style.top=e.clientY-y+"px";
 document.onmouseup=()=>active=false;
 }
 
-/* ================= TASKBAR ================= */
+/* ================= ENCODING SYSTEM (SEGREDOS) ================= */
 
-function buildTaskbar(){
-let t=document.getElementById("tasks");
-
-Object.keys(APP_REGISTRY).forEach(id=>{
-let b=document.createElement("div");
-b.className="task";
-b.innerText=id;
-b.onclick=()=>openApp(id);
-t.appendChild(b);
-});
+function encodeText(text){
+return btoa(unescape(encodeURIComponent(text)));
 }
 
-/* ================= START ================= */
+function decodeText(text){
+try{
+return decodeURIComponent(escape(atob(text)));
+}catch(e){
+return "erro na decodificação";
+}
+}
 
-document.querySelector(".start").onclick=()=>{
-startMenu.style.display=startMenu.style.display==="block"?"none":"block";
-};
+/* ================= FILES (INTERATIVO REAL) ================= */
+
+let FILES=[
+{ name:"memory.log", content:"system active" },
+{ name:"core.dat", content:"constelação layer" }
+];
+
+function openFile(name){
+let file=FILES.find(f=>f.name===name);
+if(!file) return;
+
+openApp("files_view");
+
+document.getElementById("fileContent").value=file.content;
+}
 
 /* ================= INIT ================= */
 
@@ -292,14 +171,36 @@ function init(){
 
 buildTaskbar();
 
-/* ================= APPS (RESTAURADOS + FIX) ================= */
+/* ================= FILES ================= */
 
 registerApp({
 id:"files",
 title:"files.exe",
 icon:"📁",
-content:"📁 system.log<br>📁 memory.dat"
+content:`
+<h3>📁 system files</h3>
+
+<div id="fileList">
+${FILES.map(f=>`<div onclick="openFile('${f.name}')">📄 ${f.name}</div>`).join("")}
+</div>
+
+<hr>
+
+<textarea id="fileContent"></textarea>
+
+<div class="preview">click file to open</div>
+`
 });
+
+/* hidden viewer */
+registerApp({
+id:"files_view",
+title:"file.viewer",
+icon:"📄",
+content:`<textarea id="fileContent"></textarea>`
+});
+
+/* ================= NOTES ================= */
 
 registerApp({
 id:"notes",
@@ -308,19 +209,35 @@ icon:"📝",
 content:`<textarea></textarea>`
 });
 
+/* ================= SEGREDOS (TROCA DO TODO) ================= */
+
 registerApp({
-id:"todo",
-title:"todo.exe",
-icon:"📋",
-content:`<input placeholder="task"><button>add</button>`
+id:"secrets",
+title:"secrets.exe",
+icon:"🔐",
+content:`
+<h3>🔐 SOMENTE EM CRIPTOGRAFIA</h3>
+<p>use decode para ler mensagens</p>
+
+<textarea id="secretInput"></textarea>
+
+<button onclick="encrypt()">encode</button>
+<button onclick="decrypt()">decode</button>
+
+<div id="secretOutput" class="preview"></div>
+`
 });
+
+/* ================= MUSIC ================= */
 
 registerApp({
 id:"music",
 title:"music.exe",
 icon:"🎧",
-content:`🎧 forfun<br>🌑 xamã<br>☁ mac miller<br>⚡ mgk<br>🌙 sleep token`
+content:`forfun<br>xamã<br>mac miller<br>mgk<br>sleep token`
 });
+
+/* ================= PLAYLIST ================= */
 
 registerApp({
 id:"playlist",
@@ -332,16 +249,20 @@ src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>
 `
 });
 
+/* ================= GAME ================= */
+
 registerApp({
 id:"game",
 title:"game.exe",
 icon:"🎮",
 content:`
-<h3>click game</h3>
+<h3>click system</h3>
 <button onclick="addScore()">CLICK</button>
 <div id="score">0</div>
 `
 });
+
+/* ================= SEARCH ================= */
 
 registerApp({
 id:"search",
@@ -349,6 +270,8 @@ title:"search.exe",
 icon:"🔍",
 content:`<input placeholder="search system">`
 });
+
+/* ================= SETTINGS ================= */
 
 registerApp({
 id:"settings",
@@ -369,6 +292,18 @@ createIcon(app);
 
 }
 
+/* ================= SEGREDOS LOGIC ================= */
+
+function encrypt(){
+let t=document.getElementById("secretInput").value;
+document.getElementById("secretOutput").innerText=encodeText(t);
+}
+
+function decrypt(){
+let t=document.getElementById("secretInput").value;
+document.getElementById("secretOutput").innerText=decodeText(t);
+}
+
 /* ================= GAME ================= */
 
 let score=0;
@@ -378,6 +313,3 @@ document.getElementById("score").innerText=score;
 }
 
 </script>
-
-</body>
-</html>
