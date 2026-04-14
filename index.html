@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v19</title>
+<title>Seven OS v20</title>
 
 <style>
 :root{
@@ -30,39 +30,58 @@ display:flex;
 align-items:center;
 justify-content:center;
 z-index:9999;
+cursor:pointer;
 }
 
 /* DESKTOP */
 .desktop{
 position:absolute;
 width:100%;
-height:100%;
+height:calc(100% - 48px);
 }
 
 /* ICON */
 .icon{
-position:absolute;
 width:80px;
+position:absolute;
 text-align:center;
 cursor:pointer;
+padding:6px;
+border-radius:8px;
 }
+.icon:hover{background:rgba(255,255,255,0.05)}
 
 /* TASKBAR */
 .taskbar{
 position:fixed;
 bottom:0;
 width:100%;
-height:50px;
+height:48px;
+background:rgba(10,15,20,0.85);
 display:flex;
-justify-content:center;
 align-items:center;
-background:rgba(10,15,20,0.8);
+padding:0 10px;
 }
 
-.task{padding:6px 10px;cursor:pointer}
+.start{
+padding:6px;
+cursor:pointer;
+}
+
+.tasks{
+display:flex;
+gap:6px;
+margin-left:10px;
+}
+
+.task{
+padding:6px 10px;
+cursor:pointer;
+border-radius:6px;
+}
 .task.active{background:rgba(0,255,150,0.2)}
 
-.clock{position:absolute;right:10px}
+.clock{margin-left:auto}
 
 /* WINDOW */
 .window{
@@ -70,10 +89,12 @@ position:absolute;
 width:520px;height:360px;
 background:var(--panel);
 border:1px solid rgba(0,255,150,0.2);
+border-radius:10px;
 display:none;
 flex-direction:column;
 resize:both;
 overflow:hidden;
+box-shadow:0 10px 30px rgba(0,0,0,0.6);
 }
 
 .titlebar{
@@ -84,8 +105,29 @@ justify-content:space-between;
 cursor:move;
 }
 
+.controls span{
+margin-left:8px;
+cursor:pointer;
+}
+
 .content{flex:1;padding:10px;overflow:auto}
 
+/* UI */
+button{
+background:#000;
+color:var(--accent);
+border:none;
+padding:5px;
+cursor:pointer;
+}
+
+input,textarea{
+width:100%;
+background:#000;
+color:var(--accent);
+border:none;
+padding:5px;
+}
 </style>
 </head>
 
@@ -96,7 +138,8 @@ cursor:move;
 <div class="desktop" id="desktop"></div>
 
 <div class="taskbar">
-<div id="tasks"></div>
+<div class="start">◼</div>
+<div class="tasks" id="tasks"></div>
 <div class="clock" id="clock"></div>
 </div>
 
@@ -117,15 +160,22 @@ init()
 let z=1
 function focus(w){z++;w.style.zIndex=z}
 
-/* WINDOW */
+/* WINDOW CONTROL */
 function openApp(id){
 let w=document.getElementById(id)
 w.style.display="flex"
 focus(w)
+setActive(id,true)
+}
+
+function minimize(id){
+document.getElementById(id).style.display="none"
+setActive(id,false)
 }
 
 function closeApp(id){
 document.getElementById(id).style.display="none"
+setActive(id,false)
 }
 
 /* TASKBAR */
@@ -135,13 +185,19 @@ function initTaskbar(){
 apps.forEach(id=>{
 let t=document.createElement("div")
 t.className="task"
+t.id="task-"+id
 t.innerText=id
 t.onclick=()=>openApp(id)
 tasks.appendChild(t)
 })
 }
 
-/* DRAG */
+function setActive(id,state){
+let t=document.getElementById("task-"+id)
+if(t) t.classList.toggle("active",state)
+}
+
+/* DRAG WINDOW */
 function drag(win){
 let bar=win.querySelector(".titlebar")
 let is=false,x,y
@@ -170,8 +226,12 @@ w.className="window"
 w.id=id
 
 w.innerHTML=`
-<div class="titlebar">${title}
+<div class="titlebar">
+${title}
+<div class="controls">
+<span onclick="minimize('${id}')">—</span>
 <span onclick="closeApp('${id}')">✕</span>
+</div>
 </div>
 <div class="content">${html}</div>
 `
@@ -191,21 +251,16 @@ d.ondblclick=()=>openApp(id)
 desktop.appendChild(d)
 }
 
-/* FILE SYSTEM COM PASTAS */
-let fs = JSON.parse(localStorage.getItem("fs")||"null") || {
-name:"root",
-folders:[],
-files:[]
+/* FILE SYSTEM */
+let fs=JSON.parse(localStorage.getItem("fs")||"null")||{
+name:"root",folders:[],files:[]
 }
+let current=fs
 
-let current = fs
-
-function saveFS(){
-localStorage.setItem("fs",JSON.stringify(fs))
-}
+function saveFS(){localStorage.setItem("fs",JSON.stringify(fs))}
 
 function renderFS(){
-explorer.innerHTML=`<h3>${current.name}</h3>`
+explorer.innerHTML="<b>"+current.name+"</b><br><br>"
 
 current.folders.forEach(f=>{
 let d=document.createElement("div")
@@ -223,28 +278,25 @@ explorer.appendChild(d)
 }
 
 function newFolder(){
-let n=prompt("nome da pasta")
+let n=prompt("nome pasta")
 if(!n) return
 current.folders.push({name:n,folders:[],files:[]})
-saveFS()
-renderFS()
+saveFS();renderFS()
 }
 
 function newFile(){
-let n=prompt("nome do arquivo")
+let n=prompt("nome arquivo")
 if(!n) return
 current.files.push({name:n,content:""})
-saveFS()
-renderFS()
+saveFS();renderFS()
 }
 
+let currentFile=null
 function openFile(f){
 openApp("notes")
 note.value=f.content
 currentFile=f
 }
-
-let currentFile=null
 
 function saveNote(){
 if(currentFile){
@@ -253,14 +305,24 @@ saveFS()
 }
 }
 
+/* GAME */
+let score=0
+function clickGame(){
+score++
+gameScore.innerText="score "+score
+}
+
 /* INIT */
 function init(){
 
 initTaskbar()
 
-icon("📁 files","files",20,20)
-icon("📝 notes","notes",20,100)
-icon("📋 todo","todo",20,180)
+icon("📁<br>files","files",20,20)
+icon("📝<br>notes","notes",20,110)
+icon("📋<br>todo","todo",20,200)
+icon("🎧<br>music","music",120,20)
+icon("🎵<br>playlist","playlist",120,110)
+icon("🎮<br>game","game",120,200)
 
 createWindow("files","files.exe",`
 <button onclick="newFolder()">+ pasta</button>
@@ -270,6 +332,11 @@ createWindow("files","files.exe",`
 
 createWindow("notes","notes.exe",`
 <textarea id="note" oninput="saveNote()"></textarea>
+`)
+
+createWindow("game","game.exe",`
+<button onclick="clickGame()">click</button>
+<div id="gameScore">score 0</div>
 `)
 
 renderFS()
