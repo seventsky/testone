@@ -2,14 +2,14 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v13</title>
+<title>Seven OS v13.5</title>
 
 <style>
 *{box-sizing:border-box}
 
 body{
 margin:0;
-font-family:monospace;
+font-family:"Segoe UI", monospace;
 background:radial-gradient(circle at top,#0f1722,#05070a);
 color:#d1d5db;
 overflow:hidden;
@@ -17,19 +17,14 @@ overflow:hidden;
 
 /* LOGIN */
 #login{
-position:fixed;
-width:100%;
-height:100%;
-background:black;
-display:flex;
-align-items:center;
-justify-content:center;
+position:fixed;width:100%;height:100%;
+background:black;display:flex;
+align-items:center;justify-content:center;
 z-index:9999;
 }
 #loginBox{
-background:#111;
-padding:20px;
-border:1px solid #0f0;
+background:#111;padding:20px;
+border:1px solid rgba(0,255,150,0.3);
 }
 
 /* DESKTOP */
@@ -41,44 +36,47 @@ grid-template-columns:repeat(auto-fill,90px);
 gap:14px;
 }
 
-/* ICONES */
+/* ICON */
 .icon{
 text-align:center;
 padding:6px;
-cursor:pointer;
 border-radius:6px;
+cursor:pointer;
 }
 .icon:hover{background:rgba(255,255,255,0.05)}
 
 /* TASKBAR */
 .taskbar{
 height:48px;
-background:rgba(10,15,20,0.9);
+background:rgba(10,15,20,0.85);
 display:flex;
 align-items:center;
 padding:0 10px;
 position:fixed;
-bottom:0;
-width:100%;
+bottom:0;width:100%;
+backdrop-filter:blur(10px);
 }
 
 .start{cursor:pointer;padding:6px}
 .apps{display:flex;gap:8px;margin-left:10px}
-.task{padding:6px;cursor:pointer}
+.task{padding:6px;border-radius:4px;cursor:pointer}
+.task.active{background:rgba(0,255,150,0.2)}
+.clock{margin-left:auto;font-size:12px}
 
-/* WINDOWS */
+/* WINDOW */
 .window{
 position:absolute;
-width:520px;
-height:360px;
+width:520px;height:360px;
 background:#0b0f14;
-border:1px solid rgba(0,255,150,0.2);
+border:1px solid rgba(0,255,150,0.1);
 border-radius:8px;
 display:none;
 flex-direction:column;
 resize:both;
 overflow:hidden;
 }
+
+.window.active{z-index:999}
 
 .titlebar{
 height:32px;
@@ -90,38 +88,48 @@ padding:0 10px;
 cursor:move;
 }
 
+.controls span{margin-left:10px;cursor:pointer}
 .content{flex:1;padding:10px;overflow:auto}
 
 /* FILE */
-.file{padding:6px;background:#111;margin-bottom:6px;cursor:pointer}
-.file:hover{background:rgba(0,255,150,0.2)}
+.file{
+padding:6px;
+background:#111;
+margin-bottom:6px;
+cursor:pointer;
+border-radius:6px;
+}
+.file:hover{background:rgba(0,255,150,0.15)}
 
 /* EDITOR */
 textarea{
-width:100%;
-height:100%;
+width:100%;height:100%;
 background:#000;
-color:#0f0;
+color:#00ff9f;
 border:none;
 outline:none;
 }
 
-/* CONTEXT */
-#menu{
-position:absolute;
-background:#111;
-border:1px solid #0f0;
-display:none;
+/* TERMINAL */
+.terminal-input{
+background:transparent;border:none;
+color:#00ff9f;width:100%;outline:none;
 }
-#menu div{padding:6px;cursor:pointer}
-#menu div:hover{background:rgba(0,255,150,0.2)}
+
+/* MUSIC */
+.artist{
+padding:8px;
+margin-bottom:6px;
+background:#111;
+border-radius:6px;
+}
+.artist:hover{background:rgba(0,255,150,0.15)}
 
 </style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
 <div id="login">
 <div id="loginBox">
 <input id="user" placeholder="user"><br><br>
@@ -130,13 +138,12 @@ display:none;
 </div>
 </div>
 
-<!-- DESKTOP -->
 <div class="desktop" id="desktop"></div>
 
-<!-- TASKBAR -->
 <div class="taskbar">
 <div class="start">◼</div>
 <div class="apps" id="apps"></div>
+<div class="clock" id="clock"></div>
 </div>
 
 <script>
@@ -149,10 +156,15 @@ init()
 }
 }
 
+/* CLOCK */
+setInterval(()=>{
+clock.innerText=new Date().toLocaleTimeString().slice(0,5)
+},1000)
+
 /* FILESYSTEM */
 let fs={
 "C:":{
-"Users":{"Seven":{"notes.txt":"bem-vindo"}},
+"Users":{"Seven":{"notes.txt":"fragmentos..."}},
 "System":{"log.sys":"protected"}
 }
 }
@@ -170,17 +182,33 @@ function openApp(id){
 let w=document.getElementById(id)
 w.style.display="flex"
 focus(w)
+
+if(!document.getElementById("task-"+id)){
+let t=document.createElement("div")
+t.className="task active"
+t.id="task-"+id
+t.innerText="▣"
+t.onclick=()=>toggleWin(id)
+apps.appendChild(t)
+}
 }
 
-function focus(w){
-document.querySelectorAll(".window").forEach(x=>x.style.zIndex=1)
-w.style.zIndex=999
+function toggleWin(id){
+let w=document.getElementById(id)
+w.style.display=w.style.display==="none"?"flex":"none"
+}
+
+function focus(win){
+document.querySelectorAll(".window").forEach(w=>w.classList.remove("active"))
+win.classList.add("active")
 }
 
 /* DRAG */
 document.addEventListener("mousedown",e=>{
-if(e.target.classList.contains("titlebar")){
-let win=e.target.parentElement
+if(e.target.closest(".titlebar")){
+let win=e.target.closest(".window")
+focus(win)
+
 let shiftX=e.clientX-win.offsetLeft
 let shiftY=e.clientY-win.offsetTop
 
@@ -198,19 +226,26 @@ document.addEventListener("mouseup",()=>document.removeEventListener("mousemove"
 function createIcon(name,app){
 let d=document.createElement("div")
 d.className="icon"
-d.innerText=name
+d.innerHTML=name
 d.ondblclick=()=>openApp(app)
 desktop.appendChild(d)
 }
 
-/* CREATE WINDOWS */
+/* CREATE WINDOW */
 function createWindow(id,title,html){
 let w=document.createElement("div")
 w.className="window"
 w.id=id
 
 w.innerHTML=`
-<div class="titlebar">${title}</div>
+<div class="titlebar">
+${title}
+<div class="controls">
+<span onclick="this.closest('.window').style.display='none'">—</span>
+<span onclick="this.closest('.window').classList.toggle('max')">⬜</span>
+<span onclick="this.closest('.window').style.display='none'">✕</span>
+</div>
+</div>
 <div class="content">${html}</div>`
 
 document.body.appendChild(w)
@@ -243,32 +278,47 @@ fileList.appendChild(d)
 
 /* TERMINAL */
 function term(){
-input.onkeydown=e=>{
+termIn.onkeydown=e=>{
 if(e.key==="Enter"){
-let cmd=input.value
-out.innerHTML+=`<div>> ${cmd}</div>`
+let cmd=termIn.value
+print("> "+cmd)
 
 let [b,a]=cmd.split(" ")
 
-if(b==="ls") listDir().forEach(x=>out.innerHTML+=`<div>${x}</div>`)
+if(b==="ls") listDir().forEach(f=>print(f))
 if(b==="cd"){currentPath.push(a);renderExplorer()}
-if(b==="touch"){getDir()[a]="";renderExplorer()}
+if(b==="clear") termOut.innerHTML=""
+if(b==="whoami") print("seven@os")
 
-input.value=""
+termIn.value=""
 }
 }
+}
+
+function print(t){
+termOut.innerHTML+="<div>"+t+"</div>"
+termOut.scrollTop=termOut.scrollHeight
 }
 
 /* INIT */
 function init(){
 
-createIcon("📁 files","files")
-createIcon("⌨ terminal","terminal")
-createIcon("📝 notes","editor")
+createIcon("📰<br>log","files")
+createIcon("📝<br>notes","editor")
+createIcon("⌨<br>terminal","terminal")
+createIcon("🎧<br>youtube","music")
 
 createWindow("files","files.exe","<div id='fileList'></div>")
-createWindow("editor","editor.exe","<textarea id='editor'></textarea>")
-createWindow("terminal","terminal.exe","<div id='out'></div><input id='input'>")
+createWindow("editor","notes.exe","<textarea id='editor'></textarea>")
+createWindow("terminal","terminal.exe","<div id='termOut'></div><input class='terminal-input' id='termIn'>")
+
+createWindow("music","youtube.exe",`
+<div class="artist">🎧 forfun</div>
+<div class="artist">🌑 xamã</div>
+<div class="artist">☁ mac miller</div>
+<div class="artist">⚡ mgk</div>
+<div class="artist">🩸 sleep token</div>
+`)
 
 setTimeout(renderExplorer,100)
 setTimeout(term,100)
