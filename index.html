@@ -2,317 +2,103 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS</title>
-
+<title>Seven OS Ultimate</title>
 <style>
 *{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:"Segoe UI", monospace;
-  background:radial-gradient(circle at top,#0f1722,#05070a);
-  color:#d1d5db;
-  overflow:hidden;
-}
-
-/* DESKTOP */
-.desktop{
-  height:calc(100vh - 48px);
-  padding:20px;
-  display:grid;
-  grid-template-columns:repeat(auto-fill,90px);
-  gap:14px;
-  z-index:1;
-}
-
-/* ICONES */
-.icon{
-  text-align:center;
-  padding:6px;
-  border-radius:6px;
-  cursor:pointer;
-  user-select:none;
-}
+body{margin:0;font-family:"Segoe UI",monospace;background:#05070a;color:#d1d5db;overflow:hidden}
+.desktop{height:calc(100vh - 48px);padding:20px;display:grid;grid-template-columns:repeat(auto-fill,90px);gap:14px}
+.icon{text-align:center;padding:6px;border-radius:6px;cursor:pointer}
 .icon:hover{background:rgba(255,255,255,0.08)}
-.icon span{font-size:28px}
-
-/* TASKBAR */
-.taskbar{
-  height:48px;
-  background:rgba(10,15,20,0.8);
-  backdrop-filter:blur(12px);
-  display:flex;
-  align-items:center;
-  padding:0 10px;
-  position:fixed;
-  bottom:0;
-  width:100%;
-  z-index:9999;
-}
-
-.start{cursor:pointer;padding:6px}
-.start:hover{background:rgba(0,255,150,0.1)}
-
-.search{
-  margin-left:10px;
-  background:rgba(255,255,255,0.05);
-  border:none;
-  padding:6px 12px;
-  border-radius:20px;
-  color:white;
-}
-
-.apps{display:flex;gap:8px;margin-left:20px}
-.task{padding:6px;border-radius:4px;cursor:pointer}
-.task.active{background:rgba(0,255,150,0.2)}
-
-.clock{margin-left:auto;font-size:12px}
-
-/* MENU */
-.menu{
-  position:fixed;
-  bottom:55px;
-  left:10px;
-  width:240px;
-  background:#111;
-  border-radius:10px;
-  display:none;
-  padding:10px;
-  z-index:9999;
-}
-.menu div{padding:8px;border-radius:6px;cursor:pointer}
-.menu div:hover{background:rgba(0,255,150,0.1)}
-
-/* JANELAS */
-.window{
-  position:absolute;
-  width:520px;
-  height:360px;
-  background:#0b0f14;
-  border:1px solid rgba(0,255,150,0.1);
-  border-radius:8px;
-  display:none;
-  flex-direction:column;
-  z-index:10;
-}
-
-.window.active{z-index:999}
-
-.titlebar{
-  height:32px;
-  background:#111;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:0 10px;
-  cursor:move;
-}
-
-.controls span{margin-left:10px;cursor:pointer}
-
-.content{
-  flex:1;
-  padding:10px;
-  overflow:auto;
-}
-
-/* POSTS */
-.post{
-  background:#111;
-  padding:10px;
-  margin-bottom:10px;
-  border-radius:6px;
-}
-
-/* TERMINAL */
-.terminal-output{
-  font-size:13px;
-  color:#00ff9f;
-}
-.terminal-input{
-  border:none;
-  background:transparent;
-  color:#00ff9f;
-  width:100%;
-  outline:none;
-}
-
-/* MAX */
-.max{
-  top:0!important;
-  left:0!important;
-  width:100%!important;
-  height:calc(100vh - 48px)!important;
-  border-radius:0;
-}
+.window{position:absolute;width:520px;height:360px;background:#0b0f14;border:1px solid rgba(0,255,150,0.1);border-radius:8px;display:none;flex-direction:column}
+.titlebar{height:32px;background:#111;display:flex;justify-content:space-between;align-items:center;padding:0 10px;cursor:move}
+.content{flex:1;padding:10px;overflow:auto}
+.taskbar{height:48px;background:#111;display:flex;align-items:center;padding:0 10px;position:fixed;bottom:0;width:100%}
+.terminal{color:#00ff9f;font-size:13px}
+.hidden{display:none}
 </style>
 </head>
-
 <body>
 
 <div class="desktop">
-  <div class="icon" ondblclick="openApp('blog')"><span>📰</span><br>log</div>
-  <div class="icon" ondblclick="openApp('notes')"><span>✎</span><br>notes</div>
-  <div class="icon" ondblclick="openApp('terminal')"><span>⌨</span><br>terminal</div>
-  <div class="icon" ondblclick="openApp('music')"><span>🎵</span><br>youtube</div>
-  <div class="icon" ondblclick="openApp('files')"><span>📁</span><br>files</div>
-  <div class="icon" ondblclick="openApp('memory')"><span>🧠</span><br>memory</div>
-</div>
-
-<!-- MENU -->
-<div class="menu" id="menu">
-  <div onclick="openApp('music')">🎵 youtube</div>
-  <div onclick="openApp('files')">📁 files</div>
-  <div onclick="openApp('memory')">🧠 memory</div>
-</div>
-
-<!-- MUSIC -->
-<div class="window" id="music" style="top:100px;left:150px;">
-  <div class="titlebar">youtube.exe
-    <div class="controls">
-      <span onclick="minimize('music')">—</span>
-      <span onclick="maximize('music')">⬜</span>
-      <span onclick="closeApp('music')">✕</span>
-    </div>
-  </div>
-  <div class="content">
-    <iframe width="100%" height="100%" 
-    src="https://www.youtube.com/embed/5qap5aO4i9A"
-    frameborder="0" allowfullscreen></iframe>
-  </div>
-</div>
-
-<!-- FILES -->
-<div class="window" id="files" style="top:120px;left:220px;">
-  <div class="titlebar">files.exe
-    <div class="controls">
-      <span onclick="minimize('files')">—</span>
-      <span onclick="maximize('files')">⬜</span>
-      <span onclick="closeApp('files')">✕</span>
-    </div>
-  </div>
-  <div class="content">
-    <div class="post">notes.txt</div>
-    <div class="post">log.sys</div>
-    <div class="post">memory.cache</div>
-  </div>
-</div>
-
-<!-- MEMORY -->
-<div class="window" id="memory" style="top:140px;left:260px;">
-  <div class="titlebar">memory.exe
-    <div class="controls">
-      <span onclick="minimize('memory')">—</span>
-      <span onclick="maximize('memory')">⬜</span>
-      <span onclick="closeApp('memory')">✕</span>
-    </div>
-  </div>
-  <div class="content">
-    <textarea id="mem" style="width:100%;height:100%;background:transparent;color:white;border:none;"></textarea>
-  </div>
+<div class="icon" ondblclick="openApp('terminal')">⌨<br>terminal</div>
+<div class="icon" ondblclick="openApp('music')">🎵<br>youtube</div>
+<div class="icon" ondblclick="openApp('browser')">🌐<br>browser</div>
+<div class="icon" ondblclick="openApp('files')">📁<br>files</div>
+<div class="icon" ondblclick="openApp('game')">🎮<br>unknown</div>
 </div>
 
 <!-- TERMINAL -->
-<div class="window" id="terminal" style="top:100px; left:260px;">
-  <div class="titlebar">terminal.exe
-    <div class="controls">
-      <span onclick="minimize('terminal')">—</span>
-      <span onclick="maximize('terminal')">⬜</span>
-      <span onclick="closeApp('terminal')">✕</span>
-    </div>
-  </div>
-  <div class="content terminal-output" id="termOut"></div>
-  <input class="terminal-input" id="termIn" placeholder="type command...">
+<div class="window" id="terminal" style="top:100px;left:200px">
+<div class="titlebar">terminal.exe</div>
+<div class="content terminal" id="termOut"></div>
+<input id="termIn" style="background:black;color:#0f0;width:100%;border:none">
 </div>
 
-<!-- TASKBAR -->
-<div class="taskbar">
-  <div class="start" onclick="toggleMenu()">◼</div>
-  <input class="search" placeholder="search">
-  <div class="apps" id="apps"></div>
-  <div class="clock" id="clock"></div>
+<!-- MUSIC -->
+<div class="window" id="music" style="top:120px;left:240px">
+<div class="titlebar">youtube.exe</div>
+<div class="content">
+<iframe width="100%" height="100%" src="https://www.youtube.com/embed/5qap5aO4i9A"></iframe>
 </div>
+</div>
+
+<!-- BROWSER -->
+<div class="window" id="browser" style="top:140px;left:260px">
+<div class="titlebar">browser.exe</div>
+<div class="content">
+<input id="url" placeholder="type url..." style="width:100%">
+<iframe id="frame" style="width:100%;height:90%"></iframe>
+</div>
+</div>
+
+<!-- FILES -->
+<div class="window" id="files" style="top:160px;left:280px">
+<div class="titlebar">files.exe</div>
+<div class="content">
+<div onclick="alert('arquivo corrompido')">secret.txt</div>
+<div onclick="alert('acesso negado')">system.log</div>
+</div>
+</div>
+
+<!-- GAME -->
+<div class="window" id="game" style="top:180px;left:300px">
+<div class="titlebar">unknown.exe</div>
+<div class="content">
+<p>digite no terminal: unlock</p>
+</div>
+</div>
+
+<div class="taskbar">Seven OS Ultimate</div>
 
 <script>
+function openApp(id){document.getElementById(id).style.display='flex'}
 
-/* CLOCK */
-setInterval(()=>{
-  clock.innerText=new Date().toLocaleTimeString().slice(0,5);
-},1000);
+// TERMINAL
+let out=document.getElementById('termOut');
+let input=document.getElementById('termIn');
+let secret=false;
 
-/* APP SYSTEM */
-function openApp(id){
-  let w=document.getElementById(id);
-  w.style.display="flex";
-  focus(w);
+input.addEventListener('keydown',e=>{
+if(e.key==='Enter'){
+let cmd=input.value;
+out.innerHTML+="<div>> "+cmd+"</div>";
+
+if(cmd==='help') out.innerHTML+="<div>help unlock scan</div>";
+else if(cmd==='scan') out.innerHTML+="<div>system clean</div>";
+else if(cmd==='unlock'){secret=true;out.innerHTML+="<div>hidden system unlocked</div>"}
+else if(cmd==='run secret' && secret) openApp('game');
+else out.innerHTML+="<div>unknown</div>";
+
+input.value='';
 }
-
-function closeApp(id){document.getElementById(id).style.display="none";}
-function minimize(id){document.getElementById(id).style.display="none";}
-function maximize(id){document.getElementById(id).classList.toggle("max");}
-
-function focus(win){
-  document.querySelectorAll(".window").forEach(w=>w.classList.remove("active"));
-  win.classList.add("active");
-}
-
-/* MENU */
-function toggleMenu(){
-  menu.style.display=menu.style.display==="block"?"none":"block";
-}
-
-/* DRAG */
-document.querySelectorAll(".window").forEach(win=>{
-  let bar=win.querySelector(".titlebar");
-  let is=false,x,y;
-
-  bar.onmousedown=e=>{
-    focus(win);
-    is=true;
-    x=e.clientX-win.offsetLeft;
-    y=e.clientY-win.offsetTop;
-  };
-
-  document.onmouseup=()=>is=false;
-
-  document.onmousemove=e=>{
-    if(is && !win.classList.contains("max")){
-      win.style.left=e.clientX-x+"px";
-      win.style.top=e.clientY-y+"px";
-    }
-  };
-
-  win.addEventListener("mousedown",()=>focus(win));
 });
 
-/* MEMORY SAVE */
-let m=document.getElementById("mem");
-m.value=localStorage.getItem("memory")||"";
-m.oninput=()=>localStorage.setItem("memory",m.value);
-
-/* TERMINAL */
-let out=document.getElementById("termOut");
-let input=document.getElementById("termIn");
-
-input.addEventListener("keydown",e=>{
-  if(e.key==="Enter"){
-    let cmd=input.value;
-    print("> "+cmd);
-
-    if(cmd==="help") print("help | whoami | clear | open music");
-    else if(cmd==="whoami") print("seven@os");
-    else if(cmd==="open music") openApp("music");
-    else if(cmd==="clear") out.innerHTML="";
-    else print("unknown");
-
-    input.value="";
-  }
-});
-
-function print(t){
-  out.innerHTML+="<div>"+t+"</div>";
-  out.scrollTop=out.scrollHeight;
+// BROWSER
+url.addEventListener('keydown',e=>{
+if(e.key==='Enter'){
+frame.src="https://"+url.value;
 }
-
+});
 </script>
 
 </body>
