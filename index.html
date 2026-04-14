@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v5</title>
+<title>Seven OS v6</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:"Segoe UI",monospace;background:#05070a;color:#d1d5db;overflow:hidden}
@@ -13,13 +13,14 @@ body{margin:0;font-family:"Segoe UI",monospace;background:#05070a;color:#d1d5db;
 .titlebar{height:32px;background:#111;display:flex;justify-content:space-between;align-items:center;padding:0 10px;cursor:move}
 .controls span{margin-left:10px;cursor:pointer}
 .content{flex:1;padding:10px;overflow:auto}
-.taskbar{height:48px;background:#111;display:flex;align-items:center;padding:0 10px;position:fixed;bottom:0;width:100%;z-index:9999}
+.taskbar{height:48px;background:#0a0f14;display:flex;align-items:center;padding:0 10px;position:fixed;bottom:0;width:100%;z-index:9999}
 .task{padding:6px 10px;margin:0 4px;border-radius:4px;cursor:pointer;background:rgba(255,255,255,0.05)}
 .task.active{background:rgba(0,255,150,0.2)}
 textarea{width:100%;height:100%;background:transparent;color:white;border:none;outline:none}
 .file{padding:8px;background:#111;margin-bottom:6px;border-radius:6px;cursor:pointer}
+.file:hover{background:rgba(0,255,150,0.1)}
 .artist{padding:6px;margin-bottom:6px;background:#111;border-radius:6px}
-canvas{background:black}
+.statusbar{position:absolute;bottom:0;width:100%;font-size:11px;color:#6b7280;padding:2px 8px;background:#0a0f14}
 .max{top:0!important;left:0!important;width:100%!important;height:calc(100vh - 48px)!important;border-radius:0}
 </style>
 </head>
@@ -31,7 +32,6 @@ canvas{background:black}
 <div class="icon" ondblclick="openApp('files')">📁<br>files</div>
 <div class="icon" ondblclick="openApp('notes')">🧠<br>notes</div>
 <div class="icon" ondblclick="openApp('browser')">🌐<br>browser</div>
-<div class="icon" ondblclick="openApp('game')">🎮<br>game</div>
 </div>
 
 <!-- MUSIC -->
@@ -44,27 +44,32 @@ canvas{background:black}
 <div class="artist">⚡ mgk</div>
 <div class="artist">🕯️ sleep token</div>
 </div>
+<div class="statusbar">media index loaded</div>
 </div>
 
 <!-- FILES -->
 <div class="window" id="files" style="top:160px;left:280px">
 <div class="titlebar">files.exe<div class="controls"><span onclick="minimize('files')">—</span><span onclick="maximize('files')">⬜</span><span onclick="closeApp('files')">✕</span></div></div>
-<div class="content">
+<div class="content" id="fileList">
 <div class="file" onclick="openFile('f1')">fragmento.txt</div>
 <div class="file" onclick="openFile('f2')">log.sys</div>
+<div class="file" onclick="openFile('f3')">readme.md</div>
 </div>
+<div class="statusbar">3 items</div>
 </div>
 
 <!-- VIEWER -->
 <div class="window" id="viewer" style="top:180px;left:320px">
 <div class="titlebar">viewer.exe<div class="controls"><span onclick="minimize('viewer')">—</span><span onclick="maximize('viewer')">⬜</span><span onclick="closeApp('viewer')">✕</span></div></div>
 <div class="content" id="fileContent"></div>
+<div class="statusbar" id="viewerStatus">ready</div>
 </div>
 
 <!-- NOTES -->
 <div class="window" id="notes" style="top:140px;left:200px">
 <div class="titlebar">notes.exe<div class="controls"><span onclick="minimize('notes')">—</span><span onclick="maximize('notes')">⬜</span><span onclick="closeApp('notes')">✕</span></div></div>
 <div class="content"><textarea id="note"></textarea></div>
+<div class="statusbar">autosave enabled</div>
 </div>
 
 <!-- BROWSER -->
@@ -74,14 +79,7 @@ canvas{background:black}
 <input id="url" placeholder="https://..." style="width:100%">
 <iframe id="frame" style="width:100%;height:90%"></iframe>
 </div>
-</div>
-
-<!-- GAME -->
-<div class="window" id="game" style="top:200px;left:300px">
-<div class="titlebar">game.exe<div class="controls"><span onclick="minimize('game')">—</span><span onclick="maximize('game')">⬜</span><span onclick="closeApp('game')">✕</span></div></div>
-<div class="content">
-<canvas id="gameCanvas" width="300" height="200"></canvas>
-</div>
+<div class="statusbar">network idle</div>
 </div>
 
 <!-- TERMINAL -->
@@ -89,6 +87,7 @@ canvas{background:black}
 <div class="titlebar">terminal.exe<div class="controls"><span onclick="minimize('terminal')">—</span><span onclick="maximize('terminal')">⬜</span><span onclick="closeApp('terminal')">✕</span></div></div>
 <div class="content" id="termOut"></div>
 <input id="termIn" style="background:black;color:#0f0;width:100%;border:none">
+<div class="statusbar">user: seven</div>
 </div>
 
 <!-- TASKBAR -->
@@ -98,7 +97,6 @@ canvas{background:black}
 <div class="task" onclick="openApp('files')">📁</div>
 <div class="task" onclick="openApp('notes')">🧠</div>
 <div class="task" onclick="openApp('browser')">🌐</div>
-<div class="task" onclick="openApp('game')">🎮</div>
 </div>
 
 <script>
@@ -117,22 +115,52 @@ document.onmousemove=e=>{if(is&&!win.classList.contains('max')){win.style.left=(
 document.onmouseup=()=>is=false;
 });
 
-// FILES
-function openFile(id){openApp('viewer');let c={f1:"fragmento: voce nao esta sozinho.",f2:"[log] atividade detectada..."};fileContent.innerText=c[id]}
+// FILE SYSTEM
+const filesData={
+f1:"não começa com escolha.",
+f2:"[log] sistema operando normalmente.",
+f3:"Seven OS - sistema experimental."
+};
+
+function openFile(id){
+openApp('viewer');
+fileContent.innerText=filesData[id];
+viewerStatus.innerText="opened: "+id;
+}
 
 // NOTES
 let n=document.getElementById('note');n.value=localStorage.getItem('note')||"";n.oninput=()=>localStorage.setItem('note',n.value);
 
 // TERMINAL
 let out=document.getElementById('termOut');let input=document.getElementById('termIn');
-input.addEventListener('keydown',e=>{if(e.key==='Enter'){let cmd=input.value;out.innerHTML+="<div>> "+cmd+"</div>";if(cmd==='help')out.innerHTML+="<div>help | open game</div>";else if(cmd==='open game')openApp('game');else out.innerHTML+="<div>unknown</div>";input.value='';}});
+let state={deep:false};
 
-// SIMPLE GAME
-let c=document.getElementById('gameCanvas');let ctx=c.getContext('2d');let x=10;
-function loop(){ctx.clearRect(0,0,300,200);ctx.fillStyle='#0f0';ctx.fillRect(x,90,20,20);x+=1;if(x>300)x=0;requestAnimationFrame(loop)}
-loop();
+input.addEventListener('keydown',e=>{
+if(e.key==='Enter'){
+let cmd=input.value.trim();
+out.innerHTML+="<div>> "+cmd+"</div>";
 
-// BROWSER
+if(cmd==='help') out.innerHTML+="<div>help | scan | scan deep | logs</div>";
+else if(cmd==='scan') out.innerHTML+="<div>system OK</div>";
+else if(cmd==='scan deep'){state.deep=true;out.innerHTML+="<div>deep scan running...</div>";setTimeout(()=>{out.innerHTML+="<div>no anomalies (hidden)</div>";},1000);} 
+else if(cmd==='logs'){
+if(state.deep) out.innerHTML+="<div>[log] delayed response detected.</div>";
+else out.innerHTML+="<div>[log] clean.</div>";
+}
+else out.innerHTML+="<div>unknown command</div>";
+
+input.value='';
+}
+});
+
+// subtle system drift
+setInterval(()=>{
+if(state.deep){
+  document.title="Seven OS • active";
+}
+},2000);
+
+// browser
 url.addEventListener('keydown',e=>{if(e.key==='Enter')frame.src=url.value});
 
 </script>
