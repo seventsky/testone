@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v24.3</title>
+<title>Seven OS v24.3 FINAL</title>
 
 <style>
 body{
@@ -13,7 +13,6 @@ color:#d1d5db;
 overflow:hidden;
 }
 
-/* LOGIN */
 #login{
 position:fixed;
 inset:0;
@@ -26,7 +25,6 @@ cursor:pointer;
 z-index:99999;
 }
 
-/* DESKTOP */
 #desktop{
 position:absolute;
 inset:0 0 48px 0;
@@ -37,7 +35,6 @@ padding:20px;
 align-content:start;
 }
 
-/* ICONS */
 .icon{
 width:80px;
 height:80px;
@@ -56,7 +53,6 @@ background:rgba(0,255,150,0.08);
 transform:scale(1.05);
 }
 
-/* TASKBAR */
 .taskbar{
 position:fixed;
 bottom:0;
@@ -90,7 +86,6 @@ background:#00ff9f33;
 margin-left:auto;
 }
 
-/* WINDOW */
 .window{
 position:absolute;
 width:480px;
@@ -126,19 +121,6 @@ padding:6px;
 width:100%;
 margin-bottom:5px;
 }
-
-/* WIDGETS */
-.widget{
-position:absolute;
-top:20px;
-right:20px;
-width:180px;
-padding:10px;
-background:#0b0f14;
-border:1px solid #00ff9f33;
-border-radius:10px;
-font-size:12px;
-}
 </style>
 </head>
 
@@ -147,12 +129,6 @@ font-size:12px;
 <div id="login" onclick="boot()">🌌 constelação</div>
 
 <div id="desktop"></div>
-
-<div class="widget" id="widget">
-⏱ system online<br>
-📡 constelação OS<br>
-🔐 secure layer active
-</div>
 
 <div class="taskbar">
 <div>◼</div>
@@ -166,7 +142,6 @@ font-size:12px;
 
 let Z=1;
 let APP_REGISTRY={};
-let ACTIVE=null;
 
 /* CLOCK */
 setInterval(()=>{
@@ -179,7 +154,7 @@ login.style.display="none";
 init();
 }
 
-/* ================= WINDOW ================= */
+/* ================= WINDOW ENGINE ================= */
 
 function createWindow(app){
 
@@ -205,8 +180,7 @@ document.body.appendChild(w);
 drag(w);
 }
 
-/* ================= ICONS ================= */
-
+/* ICONS */
 function createIcon(app){
 let d=document.createElement("div");
 d.className="icon";
@@ -220,41 +194,33 @@ d.onclick=()=>openApp(app.id);
 desktop.appendChild(d);
 }
 
-/* ================= SYSTEM ================= */
-
+/* APP SYSTEM */
 function registerApp(app){
 APP_REGISTRY[app.id]=app;
 }
 
-/* ================= OPEN ================= */
-
+/* OPEN */
 function openApp(id){
 let w=document.getElementById(id);
 if(!w) return;
 w.style.display="flex";
 focus(w);
-setActive(id);
 }
 
+/* MIN / CLOSE */
 function min(id){
 document.getElementById(id).style.display="none";
 }
 
 function closeW(id){min(id);}
 
-/* ================= FOCUS ================= */
-
+/* FOCUS */
 function focus(w){
 Z++;
 w.style.zIndex=Z;
 }
 
-function setActive(id){
-document.querySelectorAll(".task").forEach(t=>t.classList.remove("active"));
-}
-
-/* ================= DRAG ================= */
-
+/* DRAG */
 function drag(win){
 let bar=win.querySelector(".titlebar");
 let a=false,x=0,y=0;
@@ -276,8 +242,7 @@ win.style.top=e.clientY-y+"px";
 document.onmouseup=()=>a=false;
 }
 
-/* ================= TASKBAR ================= */
-
+/* TASKBAR */
 function buildTaskbar(){
 let t=document.getElementById("tasks");
 
@@ -290,35 +255,42 @@ t.appendChild(b);
 });
 }
 
-/* ================= NOTES SYSTEM ================= */
+/* ================= THEME SYSTEM (NOVO) ================= */
 
-function autoSaveNotes(){
-let n=document.querySelector("#notesArea");
-if(n){
-localStorage.setItem("notes",n.value);
+function setTheme(mode){
+if(mode==="light"){
+document.body.style.background="#e5e7eb";
+document.body.style.color="#111";
+}
+if(mode==="dark"){
+document.body.style.background="#000";
+document.body.style.color="#d1d5db";
 }
 }
 
-/* ================= FILE SYSTEM ================= */
+/* ================= SEARCH HACK SYSTEM (NOVO) ================= */
 
-let FILES=[
-{name:"memory.log",content:"system online"},
-{name:"core.dat",content:"constelação layer active"},
-{name:"user.sys",content:"profile locked"}
-];
+function searchHack(){
+let input=document.querySelector("#search input");
+if(!input) return;
 
-function openFile(name){
-let f=FILES.find(x=>x.name===name);
-if(!f) return;
+input.addEventListener("keydown",(e)=>{
+if(e.key==="Enter"){
+let val=input.value;
 
-let el=document.getElementById("fileView");
-if(el) el.value=f.content;
+let w=document.getElementById("search");
+if(w){
+w.querySelector(".content").innerHTML=`
+<div style="text-align:center;padding:20px">
+<div style="font-size:40px">👾</div>
+<h2>SISTEMA INVADIDO</h2>
+<p>${val}</p>
+</div>
+`;
 }
-
-/* ================= CRYPTO ================= */
-
-function encode(t){return btoa(unescape(encodeURIComponent(t)))}
-function decode(t){try{return decodeURIComponent(escape(atob(t)))}catch(e){return "error"}}
+}
+});
+}
 
 /* ================= INIT ================= */
 
@@ -331,11 +303,7 @@ registerApp({
 id:"files",
 title:"files.exe",
 icon:"📁",
-content:`
-<h3>FILES</h3>
-${FILES.map(f=>`<div onclick="openFile('${f.name}')">📄 ${f.name}</div>`).join("")}
-<textarea id="fileView"></textarea>
-`
+content:`📁 system.log<br>📁 memory.dat`
 });
 
 /* NOTES */
@@ -343,7 +311,7 @@ registerApp({
 id:"notes",
 title:"notes.exe",
 icon:"📝",
-content:`<textarea id="notesArea" oninput="autoSaveNotes()"></textarea>`
+content:`<textarea></textarea>`
 });
 
 /* SECRETS */
@@ -353,10 +321,7 @@ title:"secrets.exe",
 icon:"🔐",
 content:`
 <h3>somente em criptografia</h3>
-<textarea id="sec"></textarea>
-<button onclick="out.innerText=encode(sec.value)">encode</button>
-<button onclick="out.innerText=decode(sec.value)">decode</button>
-<div id="out"></div>
+<textarea></textarea>
 `
 });
 
@@ -365,7 +330,7 @@ registerApp({
 id:"music",
 title:"music.exe",
 icon:"🎧",
-content:`forfun<br>xamã<br>mac miller<br>mgk<br>sleep token`
+content:`forfun<br>xamã<br>mac miller`
 });
 
 /* PLAYLIST */
@@ -393,12 +358,16 @@ icon:"🔍",
 content:`<input placeholder="search system">`
 });
 
-/* SETTINGS */
+/* SETTINGS (ATUALIZADO) */
 registerApp({
 id:"settings",
 title:"settings.exe",
 icon:"⚙",
-content:`<button onclick="document.body.style.background='#000'">dark</button>`
+content:`
+<h3>themes</h3>
+<button onclick="setTheme('dark')">🌙 dark</button>
+<button onclick="setTheme('light')">☀ light</button>
+`
 });
 
 /* BUILD */
@@ -407,8 +376,12 @@ createWindow(app);
 createIcon(app);
 });
 
+/* SEARCH PATCH */
+searchHack();
+
 }
 
+/* GAME */
 let c=0;
 function add(){
 c++;
