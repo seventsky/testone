@@ -14,7 +14,6 @@ body{margin:0;font-family:"Segoe UI",monospace;background:#05070a;color:#d1d5db;
 .content{flex:1;padding:10px;overflow:auto}
 .taskbar{height:48px;background:#111;display:flex;align-items:center;padding:0 10px;position:fixed;bottom:0;width:100%}
 .terminal{color:#00ff9f;font-size:13px}
-.hidden{display:none}
 </style>
 </head>
 <body>
@@ -34,11 +33,11 @@ body{margin:0;font-family:"Segoe UI",monospace;background:#05070a;color:#d1d5db;
 <input id="termIn" style="background:black;color:#0f0;width:100%;border:none">
 </div>
 
-<!-- MUSIC -->
+<!-- MUSIC (YOUTUBE SEARCH) -->
 <div class="window" id="music" style="top:120px;left:240px">
 <div class="titlebar">youtube.exe</div>
 <div class="content">
-<iframe width="100%" height="100%" src="https://www.youtube.com/embed/5qap5aO4i9A"></iframe>
+<iframe width="100%" height="100%" src="https://www.youtube.com" ></iframe>
 </div>
 </div>
 
@@ -71,7 +70,41 @@ body{margin:0;font-family:"Segoe UI",monospace;background:#05070a;color:#d1d5db;
 <div class="taskbar">Seven OS Ultimate</div>
 
 <script>
-function openApp(id){document.getElementById(id).style.display='flex'}
+function openApp(id){
+  let w=document.getElementById(id);
+  w.style.display='flex';
+  focus(w);
+}
+
+function focus(win){
+  document.querySelectorAll('.window').forEach(w=>w.style.zIndex=1);
+  win.style.zIndex=999;
+}
+
+// DRAG WINDOWS
+
+document.querySelectorAll('.window').forEach(win=>{
+  let bar=win.querySelector('.titlebar');
+  let isDragging=false, offsetX, offsetY;
+
+  bar.addEventListener('mousedown',e=>{
+    isDragging=true;
+    offsetX=e.clientX-win.offsetLeft;
+    offsetY=e.clientY-win.offsetTop;
+    focus(win);
+  });
+
+  document.addEventListener('mousemove',e=>{
+    if(isDragging){
+      win.style.left=(e.clientX-offsetX)+'px';
+      win.style.top=(e.clientY-offsetY)+'px';
+    }
+  });
+
+  document.addEventListener('mouseup',()=>{
+    isDragging=false;
+  });
+});
 
 // TERMINAL
 let out=document.getElementById('termOut');
@@ -103,3 +136,4 @@ frame.src="https://"+url.value;
 
 </body>
 </html>
+
