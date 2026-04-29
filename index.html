@@ -5,12 +5,179 @@
 <title>Seven OS v24.5</title>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
 body{
 margin:0;
-font-family:Segoe UI, monospace;
-background:#000;
-color:#d1d5db;
+font-family:'Share Tech Mono', monospace;
+background:radial-gradient(circle at center,#020202 0%,#000 100%);
+color:#8affc1;
 overflow:hidden;
+}
+
+/* SCANLINES */
+body::before{
+content:"";
+position:fixed;
+inset:0;
+background:repeating-linear-gradient(
+to bottom,
+rgba(0,255,150,0.03),
+rgba(0,255,150,0.03) 1px,
+transparent 1px,
+transparent 3px
+);
+pointer-events:none;
+}
+
+/* LOGIN */
+#login{
+position:fixed;
+inset:0;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#000;
+font-size:22px;
+cursor:pointer;
+z-index:99999;
+letter-spacing:2px;
+color:#00ff9f;
+text-shadow:0 0 10px rgba(0,255,150,0.5);
+}
+
+/* DESKTOP */
+#desktop{
+position:absolute;
+inset:0 0 48px 0;
+display:grid;
+grid-template-columns:repeat(auto-fill,90px);
+gap:14px;
+padding:20px;
+align-content:start;
+}
+
+/* ICONS */
+.icon{
+width:80px;
+height:80px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+border-radius:8px;
+cursor:pointer;
+transition:.2s;
+user-select:none;
+color:#6ee7b7;
+}
+
+.icon:hover{
+background:rgba(0,255,150,0.1);
+transform:scale(1.08);
+box-shadow:0 0 10px rgba(0,255,150,0.2);
+}
+
+/* TASKBAR */
+.taskbar{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+height:48px;
+background:#05080c;
+border-top:1px solid rgba(0,255,150,0.1);
+display:flex;
+align-items:center;
+padding:0 10px;
+backdrop-filter:blur(6px);
+}
+
+.tasks{
+display:flex;
+gap:6px;
+margin-left:10px;
+}
+
+.task{
+padding:6px 10px;
+border-radius:6px;
+cursor:pointer;
+background:#0c1116;
+border:1px solid rgba(0,255,150,0.1);
+transition:.2s;
+}
+
+.task.active{
+background:#00ff9f22;
+box-shadow:0 0 8px rgba(0,255,150,0.4);
+}
+
+#clock{
+margin-left:auto;
+color:#00ff9f;
+}
+
+/* WINDOWS */
+.window{
+position:absolute;
+width:520px;
+height:340px;
+background:rgba(5,10,15,0.95);
+border:1px solid rgba(0,255,150,0.25);
+border-radius:10px;
+display:none;
+flex-direction:column;
+resize:both;
+overflow:hidden;
+box-shadow:0 0 25px rgba(0,255,150,0.15);
+}
+
+/* TITLEBAR */
+.titlebar{
+background:linear-gradient(90deg,#05080c,#0a0f14);
+padding:6px;
+display:flex;
+justify-content:space-between;
+cursor:move;
+user-select:none;
+color:#00ff9f;
+font-size:13px;
+border-bottom:1px solid rgba(0,255,150,0.15);
+}
+
+/* CONTENT */
+.content{
+flex:1;
+padding:10px;
+overflow:auto;
+}
+
+/* INPUTS */
+button,input,textarea{
+background:#000;
+color:#00ff9f;
+border:1px solid rgba(0,255,150,0.2);
+padding:6px;
+width:100%;
+margin-bottom:5px;
+font-family:'Share Tech Mono', monospace;
+}
+
+button:hover{
+background:rgba(0,255,150,0.1);
+cursor:pointer;
+}
+
+/* EXTRA DETAIL */
+#desktop::after{
+content:"user: unknown";
+position:absolute;
+bottom:60px;
+right:20px;
+font-size:10px;
+color:#00ff9f55;
+letter-spacing:1px;
 }
 
 #login{
