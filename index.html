@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v31 - Recovered</title>
+<title>Seven OS v24.5</title>
 
 <style>
 body{
@@ -11,16 +11,6 @@ font-family:Segoe UI, Arial, sans-serif;
 background:#0e1116;
 color:#d1d5db;
 overflow:hidden;
-}
-
-/* GLITCH */
-.glitch{animation:glitch 0.2s infinite;}
-@keyframes glitch{
-0%{transform:translate(0)}
-25%{transform:translate(-2px,2px)}
-50%{transform:translate(2px,-2px)}
-75%{transform:translate(-1px,1px)}
-100%{transform:translate(0)}
 }
 
 /* DESKTOP */
@@ -35,11 +25,18 @@ padding:20px;
 
 .icon{
 width:80px;
-text-align:center;
+height:80px;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+border-radius:6px;
 cursor:pointer;
 font-size:12px;
 }
-.icon:hover{background:rgba(255,255,255,0.05);}
+.icon:hover{
+background:rgba(255,255,255,0.06);
+}
 
 /* TASKBAR */
 .taskbar{
@@ -56,8 +53,12 @@ border-top:1px solid #2a2f36;
 }
 
 .start{
+width:36px;
+height:36px;
+display:flex;
+align-items:center;
+justify-content:center;
 background:#232830;
-padding:6px 12px;
 border-radius:4px;
 cursor:pointer;
 }
@@ -70,19 +71,21 @@ margin-left:10px;
 
 .task{
 padding:6px 10px;
-background:#232830;
 border-radius:4px;
 cursor:pointer;
+background:#232830;
+border:1px solid #2f343b;
 font-size:12px;
 }
 
-.task.active{background:#3a3f46;}
+.task.active{
+background:#3a3f46;
+}
 
-.tray{
+#clock{
 margin-left:auto;
-display:flex;
-gap:10px;
 font-size:12px;
+color:#aaa;
 }
 
 /* WINDOW */
@@ -121,43 +124,6 @@ padding:6px;
 width:100%;
 margin-bottom:5px;
 }
-
-/* WIDGETS */
-.widget{
-position:absolute;
-background:rgba(20,25,30,0.7);
-border:1px solid #2a2f36;
-padding:10px;
-border-radius:8px;
-font-size:12px;
-}
-
-#widget-clock{
-top:20px;
-right:20px;
-font-size:26px;
-text-align:right;
-}
-
-#widget-system{
-bottom:80px;
-left:20px;
-width:180px;
-}
-
-.bar{
-height:6px;
-background:#333;
-border-radius:4px;
-overflow:hidden;
-margin-top:4px;
-}
-
-.bar-fill{
-height:100%;
-background:#4ade80;
-width:40%;
-}
 </style>
 </head>
 
@@ -166,41 +132,23 @@ width:40%;
 <div id="login">✧₊⁺ constelação</div>
 <div id="desktop"></div>
 
-<!-- WIDGETS -->
-<div class="widget" id="widget-clock"></div>
-<div class="widget" id="widget-system">
-<div>System Status</div>
-<div>CPU</div>
-<div class="bar"><div class="bar-fill" id="cpuBar"></div></div>
-<div style="margin-top:6px;">Memory: Stable</div>
-<div>Network: Connected</div>
-</div>
-
-<!-- TASKBAR -->
 <div class="taskbar">
-<div class="start">◼ Start</div>
+<div class="start">◼</div>
 <div class="tasks" id="tasks"></div>
-<div class="tray">
-<span>📶</span>
-<span>🔋</span>
-<span id="clock"></span>
-</div>
+<div id="clock"></div>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
 
-/* REFERÊNCIAS */
 const desktop = document.getElementById("desktop");
 const tasks = document.getElementById("tasks");
 const clock = document.getElementById("clock");
 const login = document.getElementById("login");
 
-/* CORE */
 let Z=1;
 let APP_REGISTRY={};
 let FILES=[];
-let TASKS={};
 
 /* CLOCK */
 setInterval(()=>{
@@ -208,7 +156,7 @@ clock.innerText=new Date().toLocaleTimeString().slice(0,5);
 },1000);
 
 /* LOGIN */
-login.onclick = () => {
+login.onclick = ()=>{
 login.style.display="none";
 init();
 };
@@ -244,47 +192,50 @@ d.className="icon";
 
 d.innerHTML=`
 <div style="font-size:26px">${app.icon}</div>
-${app.title}
+<div>${app.title}</div>
 `;
 
 d.onclick=()=>openApp(app.id);
 desktop.appendChild(d);
 }
 
-/* TASKBAR */
+/* TASK */
 function addTask(app){
-if(TASKS[app.id]) return;
-
 let t=document.createElement("div");
 t.className="task";
 t.innerText=app.title;
-
 t.onclick=()=>openApp(app.id);
-
 tasks.appendChild(t);
-TASKS[app.id]=t;
+}
+
+/* SYSTEM */
+function registerApp(app){
+APP_REGISTRY[app.id]=app;
 }
 
 /* OPEN */
 function openApp(id){
 let w=document.getElementById(id);
-let app=APP_REGISTRY[id];
 if(!w) return;
 
 w.style.display="flex";
 focus(w);
-addTask(app);
-
-Object.values(TASKS).forEach(t=>t.classList.remove("active"));
-TASKS[id].classList.add("active");
+addTask(APP_REGISTRY[id]);
 }
 
-/* OUTROS */
-function registerApp(app){APP_REGISTRY[app.id]=app;}
-function min(id){document.getElementById(id).style.display="none";}
+/* MIN */
+function min(id){
+document.getElementById(id).style.display="none";
+}
 function closeW(id){min(id);}
-function focus(w){Z++;w.style.zIndex=Z;}
 
+/* FOCUS */
+function focus(w){
+Z++;
+w.style.zIndex=Z;
+}
+
+/* DRAG */
 function drag(win){
 let bar=win.querySelector(".titlebar");
 let active=false,x=0,y=0;
@@ -306,17 +257,39 @@ win.style.top=(e.clientY-y)+"px";
 document.onmouseup=()=>active=false;
 }
 
-/* FILE */
-function openFile(name){
-let file=FILES.find(f=>f.name===name);
-if(!file) return;
+/* ===== FUNÇÕES ORIGINAIS RESTAURADAS ===== */
 
-document.getElementById("fileView").value=file.content;
-
-if(name==="dont_open.txt"){
-document.body.classList.add("glitch");
-setTimeout(()=>document.body.classList.remove("glitch"),800);
+function upgradeTaskbar(){
+document.querySelectorAll(".task").forEach(t=>{
+t.style.transition=".2s";
+t.onmouseenter=()=>t.style.transform="scale(1.1)";
+t.onmouseleave=()=>t.style.transform="scale(1)";
+});
 }
+
+function upgradeFiles(){
+let items=document.querySelectorAll("#files .content div");
+items.forEach(item=>{
+item.onclick=()=>{
+items.forEach(i=>i.style.background="transparent");
+item.style.background="#333";
+};
+});
+}
+
+function searchHack(){
+let input=document.querySelector("#search input");
+if(!input) return;
+
+input.addEventListener("keydown",(e)=>{
+if(e.key==="Enter"){
+document.querySelector("#search .content").innerHTML=`
+<div style="text-align:center">
+<h2>SISTEMA INVADIDO</h2>
+<p>${input.value}</p>
+</div>`;
+}
+});
 }
 
 /* INIT */
@@ -326,48 +299,88 @@ FILES=[
 {name:"talvez a verdadeira.log",content:"system active"},
 {name:"melodia seja.dat",content:"constelação layer"},
 {name:"a conversa.sys",content:"locked profile"},
-{name:"entre as estrelas.sec",content:"secure boot active"},
-{name:"dont_open.txt",content:"...você não deveria estar aqui"}
+{name:"entre as estrelas.sec",content:"secure boot active"}
 ];
 
-/* APPS */
-registerApp({id:"files",title:"files.exe",icon:"📁",
+/* TODOS OS APPS ORIGINAIS */
+registerApp({
+id:"files",
+title:"files.exe",
+icon:"📁",
 content:`<h3>FILES</h3>
-${FILES.map(f=>`<div onclick="openFile('${f.name}')">📄 ${f.name}</div>`).join("")}
-<textarea id="fileView"></textarea>`});
+${FILES.map(f=>`<div>📄 ${f.name}</div>`).join("")}
+<textarea></textarea>`
+});
 
-registerApp({id:"notes",title:"notes.exe",icon:"📝",content:`<textarea></textarea>`});
-registerApp({id:"playlist",title:"playlist.exe",icon:"🎧",content:`music list...`});
-registerApp({id:"music",title:"music.exe",icon:"🎵",
-content:`<iframe width="100%" height="180" src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>`});
-registerApp({id:"game",title:"game.exe",icon:"🎮",
-content:`<button onclick="add()">click</button><div id="g">0</div>`});
-registerApp({id:"search",title:"search.exe",icon:"🔍",
-content:`<input placeholder="search system">`});
-registerApp({id:"settings",title:"settings.exe",icon:"⚙",
-content:`<button onclick="document.body.style.background='#000'">dark</button>`});
+registerApp({
+id:"notes",
+title:"notes.exe",
+icon:"📝",
+content:`<textarea></textarea>`
+});
+
+registerApp({
+id:"secrets",
+title:"secrets.exe",
+icon:"🔐",
+content:`<textarea></textarea>`
+});
+
+registerApp({
+id:"playlist",
+title:"playlist.exe",
+icon:"🎧",
+content:`forfun<br>xamã<br>mac miller<br>MGK<br>sleeptoken<br>kehlani`
+});
+
+registerApp({
+id:"music",
+title:"music.exe",
+icon:"🎵",
+content:`<iframe width="100%" height="180"
+src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>`
+});
+
+registerApp({
+id:"game",
+title:"game.exe",
+icon:"🎮",
+content:`<button onclick="add()">click</button><div id="g">0</div>`
+});
+
+registerApp({
+id:"search",
+title:"search.exe",
+icon:"🔍",
+content:`<input placeholder="search system">`
+});
+
+registerApp({
+id:"settings",
+title:"settings.exe",
+icon:"⚙",
+content:`<button onclick="document.body.style.background='#000'">dark</button>`
+});
 
 /* BUILD */
 Object.values(APP_REGISTRY).forEach(app=>{
 createWindow(app);
 createIcon(app);
 });
+
+/* RESTAURA FUNÇÕES */
+setTimeout(()=>{
+upgradeTaskbar();
+upgradeFiles();
+searchHack();
+},300);
 }
 
 /* GAME */
-let c=0;
-window.add=()=>{c++;document.getElementById("g").innerText=c;};
-
-/* WIDGETS */
-setInterval(()=>{
-let now=new Date();
-document.getElementById("widget-clock").innerHTML=
-now.toLocaleTimeString().slice(0,5);
-},1000);
-
-setInterval(()=>{
-document.getElementById("cpuBar").style.width=Math.random()*100+"%";
-},1500);
+window.add=()=>{
+let g=document.getElementById("g");
+g.innerText=parseInt(g.innerText)+1;
+};
 
 });
 </script>
