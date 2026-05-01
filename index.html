@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v29 - Recovered</title>
+<title>Seven OS v31 - Recovered</title>
 
 <style>
 body{
@@ -163,7 +163,7 @@ width:40%;
 
 <body>
 
-<div id="login" onclick="boot()">✧₊⁺ constelação</div>
+<div id="login">✧₊⁺ constelação</div>
 <div id="desktop"></div>
 
 <!-- WIDGETS -->
@@ -188,8 +188,9 @@ width:40%;
 </div>
 
 <script>
+document.addEventListener("DOMContentLoaded", () => {
 
-/* ===== CORREÇÃO CRÍTICA ===== */
+/* REFERÊNCIAS */
 const desktop = document.getElementById("desktop");
 const tasks = document.getElementById("tasks");
 const clock = document.getElementById("clock");
@@ -207,10 +208,10 @@ clock.innerText=new Date().toLocaleTimeString().slice(0,5);
 },1000);
 
 /* LOGIN */
-function boot(){
+login.onclick = () => {
 login.style.display="none";
 init();
-}
+};
 
 /* WINDOW */
 function createWindow(app){
@@ -264,11 +265,6 @@ tasks.appendChild(t);
 TASKS[app.id]=t;
 }
 
-/* SYSTEM */
-function registerApp(app){
-APP_REGISTRY[app.id]=app;
-}
-
 /* OPEN */
 function openApp(id){
 let w=document.getElementById(id);
@@ -283,20 +279,12 @@ Object.values(TASKS).forEach(t=>t.classList.remove("active"));
 TASKS[id].classList.add("active");
 }
 
-/* MIN/CLOSE */
-function min(id){
-document.getElementById(id).style.display="none";
-if(TASKS[id]) TASKS[id].classList.remove("active");
-}
+/* OUTROS */
+function registerApp(app){APP_REGISTRY[app.id]=app;}
+function min(id){document.getElementById(id).style.display="none";}
 function closeW(id){min(id);}
+function focus(w){Z++;w.style.zIndex=Z;}
 
-/* FOCUS */
-function focus(w){
-Z++;
-w.style.zIndex=Z;
-}
-
-/* DRAG */
 function drag(win){
 let bar=win.querySelector(".titlebar");
 let active=false,x=0,y=0;
@@ -318,22 +306,16 @@ win.style.top=(e.clientY-y)+"px";
 document.onmouseup=()=>active=false;
 }
 
-/* OPEN FILE */
+/* FILE */
 function openFile(name){
 let file=FILES.find(f=>f.name===name);
 if(!file) return;
 
-let view=document.getElementById("fileView");
-view.value=file.content;
+document.getElementById("fileView").value=file.content;
 
 if(name==="dont_open.txt"){
-setTimeout(()=>{
 document.body.classList.add("glitch");
-alert("isso não é seu");
-setTimeout(()=>{
-document.body.classList.remove("glitch");
-},800);
-},800);
+setTimeout(()=>document.body.classList.remove("glitch"),800);
 }
 }
 
@@ -345,100 +327,49 @@ FILES=[
 {name:"melodia seja.dat",content:"constelação layer"},
 {name:"a conversa.sys",content:"locked profile"},
 {name:"entre as estrelas.sec",content:"secure boot active"},
-{name:"dont_open.txt",content:"...você não deveria estar aqui"},
-{name:"last_user.log",content:"último login: desconhecido"},
-{name:"fragmento_01.enc",content:encode("ela sabia")},
-{name:"fragmento_02.enc",content:encode("você encontrou isso cedo demais")}
+{name:"dont_open.txt",content:"...você não deveria estar aqui"}
 ];
 
 /* APPS */
 registerApp({id:"files",title:"files.exe",icon:"📁",
-content:`<h3>FILES SYSTEM</h3>
+content:`<h3>FILES</h3>
 ${FILES.map(f=>`<div onclick="openFile('${f.name}')">📄 ${f.name}</div>`).join("")}
 <textarea id="fileView"></textarea>`});
 
 registerApp({id:"notes",title:"notes.exe",icon:"📝",content:`<textarea></textarea>`});
-
-registerApp({id:"secrets",title:"secrets.exe",icon:"🔐",
-content:`<textarea id="sec"></textarea>
-<button onclick="out.innerText=encode(sec.value)">encode</button>
-<button onclick="out.innerText=decode(sec.value)">decode</button>
-<div id="out"></div>`});
-
-registerApp({id:"playlist",title:"playlist.exe",icon:"🎧",
-content:`forfun<br>xamã<br>mac miller<br>MGK<br>sleeptoken<br>kehlani`});
-
+registerApp({id:"playlist",title:"playlist.exe",icon:"🎧",content:`music list...`});
 registerApp({id:"music",title:"music.exe",icon:"🎵",
 content:`<iframe width="100%" height="180" src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>`});
-
 registerApp({id:"game",title:"game.exe",icon:"🎮",
 content:`<button onclick="add()">click</button><div id="g">0</div>`});
-
 registerApp({id:"search",title:"search.exe",icon:"🔍",
-content:`<input id="searchInput" placeholder="search system">`});
-
+content:`<input placeholder="search system">`});
 registerApp({id:"settings",title:"settings.exe",icon:"⚙",
-content:`<button onclick="document.body.style.background='#000'">dark</button>
-<button onclick="document.body.style.background='#e5e7eb'">light</button>`});
+content:`<button onclick="document.body.style.background='#000'">dark</button>`});
 
 /* BUILD */
 Object.values(APP_REGISTRY).forEach(app=>{
 createWindow(app);
 createIcon(app);
 });
-
 }
 
 /* GAME */
 let c=0;
-function add(){c++;document.getElementById("g").innerText=c;}
-
-/* CRYPTO */
-function encode(t){return btoa(unescape(encodeURIComponent(t)))}
-function decode(t){try{return decodeURIComponent(escape(atob(t)))}catch(e){return "erro"}}
-
-/* SEARCH EVENT */
-document.addEventListener("keydown",(e)=>{
-if(e.key==="Enter"){
-let input=document.getElementById("searchInput");
-if(!input) return;
-
-let val=input.value.toLowerCase();
-
-if(val.includes("quem")){
-alert("você sabe a resposta");
-document.body.classList.add("glitch");
-setTimeout(()=>document.body.classList.remove("glitch"),500);
-}
-}
-});
+window.add=()=>{c++;document.getElementById("g").innerText=c;};
 
 /* WIDGETS */
 setInterval(()=>{
 let now=new Date();
 document.getElementById("widget-clock").innerHTML=
-now.toLocaleTimeString().slice(0,5)+"<br><span style='font-size:12px'>"+now.toLocaleDateString()+"</span>";
+now.toLocaleTimeString().slice(0,5);
 },1000);
 
 setInterval(()=>{
-let v=Math.floor(Math.random()*100);
-document.getElementById("cpuBar").style.width=v+"%";
+document.getElementById("cpuBar").style.width=Math.random()*100+"%";
 },1500);
 
-/* SISTEMA RESPONDE */
-setTimeout(()=>{
-let msg=document.createElement("div");
-msg.innerText="...você viu isso também?";
-msg.style.position="fixed";
-msg.style.bottom="70px";
-msg.style.right="20px";
-msg.style.fontSize="12px";
-msg.style.color="#888";
-document.body.appendChild(msg);
-
-setTimeout(()=>msg.remove(),4000);
-},15000);
-
+});
 </script>
 
 </body>
