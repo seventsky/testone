@@ -2,11 +2,9 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v29 - Recovered</title>
+<title>Seven OS v25 - Recovered</title>
 
 <style>
-
-/* BASE */
 body{
 margin:0;
 font-family:Segoe UI, Arial, sans-serif;
@@ -16,10 +14,7 @@ overflow:hidden;
 }
 
 /* GLITCH */
-.glitch{
-animation:glitch 0.2s infinite;
-}
-
+.glitch{animation:glitch 0.2s infinite;}
 @keyframes glitch{
 0%{transform:translate(0)}
 25%{transform:translate(-2px,2px)}
@@ -38,17 +33,13 @@ gap:12px;
 padding:20px;
 }
 
-/* ICON */
 .icon{
 width:80px;
 text-align:center;
 cursor:pointer;
 font-size:12px;
 }
-
-.icon:hover{
-background:rgba(255,255,255,0.05);
-}
+.icon:hover{background:rgba(255,255,255,0.05);}
 
 /* TASKBAR */
 .taskbar{
@@ -85,9 +76,7 @@ cursor:pointer;
 font-size:12px;
 }
 
-.task.active{
-background:#3a3f46;
-}
+.task.active{background:#3a3f46;}
 
 .tray{
 margin-left:auto;
@@ -169,19 +158,16 @@ height:100%;
 background:#4ade80;
 width:40%;
 }
-
 </style>
 </head>
 
 <body>
 
 <div id="login" onclick="boot()">✧₊⁺ constelação</div>
-
 <div id="desktop"></div>
 
 <!-- WIDGETS -->
 <div class="widget" id="widget-clock"></div>
-
 <div class="widget" id="widget-system">
 <div>System Status</div>
 <div>CPU</div>
@@ -296,7 +282,6 @@ function min(id){
 document.getElementById(id).style.display="none";
 if(TASKS[id]) TASKS[id].classList.remove("active");
 }
-
 function closeW(id){min(id);}
 
 /* FOCUS */
@@ -360,7 +345,8 @@ FILES=[
 {name:"fragmento_02.enc",content:encode("você encontrou isso cedo demais")}
 ];
 
-/* APPS (todos mantidos) */
+/* ===== TODOS OS APPS ORIGINAIS ===== */
+
 registerApp({
 id:"files",
 title:"files.exe",
@@ -370,18 +356,58 @@ ${FILES.map(f=>`<div onclick="openFile('${f.name}')">📄 ${f.name}</div>`).join
 <textarea id="fileView"></textarea>`
 });
 
-registerApp({id:"notes",title:"notes.exe",icon:"📝",content:`<textarea></textarea>`});
-registerApp({id:"secrets",title:"secrets.exe",icon:"🔐",content:`<textarea id="sec"></textarea>
+registerApp({
+id:"notes",
+title:"notes.exe",
+icon:"📝",
+content:`<textarea></textarea>`
+});
+
+registerApp({
+id:"secrets",
+title:"secrets.exe",
+icon:"🔐",
+content:`<textarea id="sec"></textarea>
 <button onclick="out.innerText=encode(sec.value)">encode</button>
 <button onclick="out.innerText=decode(sec.value)">decode</button>
-<div id="out"></div>`});
+<div id="out"></div>`
+});
 
-registerApp({id:"playlist",title:"playlist.exe",icon:"🎧",content:`forfun<br>xamã<br>mac miller<br>MGK<br>sleeptoken<br>kehlani`});
-registerApp({id:"music",title:"music.exe",icon:"🎵",content:`<iframe width="100%" height="180" src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>`});
-registerApp({id:"game",title:"game.exe",icon:"🎮",content:`<button onclick="add()">click</button><div id="g">0</div>`});
-registerApp({id:"search",title:"search.exe",icon:"🔍",content:`<input id="searchInput" placeholder="search system">`});
-registerApp({id:"settings",title:"settings.exe",icon:"⚙",content:`<button onclick="document.body.style.background='#000'">dark</button>
-<button onclick="document.body.style.background='#e5e7eb'">light</button>`});
+registerApp({
+id:"playlist",
+title:"playlist.exe",
+icon:"🎧",
+content:`forfun<br>xamã<br>mac miller<br>MGK<br>sleeptoken<br>kehlani`
+});
+
+registerApp({
+id:"music",
+title:"music.exe",
+icon:"🎵",
+content:`<iframe width="100%" height="180" src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>`
+});
+
+registerApp({
+id:"game",
+title:"game.exe",
+icon:"🎮",
+content:`<button onclick="add()">click</button><div id="g">0</div>`
+});
+
+registerApp({
+id:"search",
+title:"search.exe",
+icon:"🔍",
+content:`<input id="searchInput" placeholder="search system">`
+});
+
+registerApp({
+id:"settings",
+title:"settings.exe",
+icon:"⚙",
+content:`<button onclick="document.body.style.background='#000'">dark</button>
+<button onclick="document.body.style.background='#e5e7eb'">light</button>`
+});
 
 /* BUILD */
 Object.values(APP_REGISTRY).forEach(app=>{
@@ -393,7 +419,10 @@ createIcon(app);
 
 /* GAME */
 let c=0;
-function add(){c++;document.getElementById("g").innerText=c;}
+function add(){
+c++;
+document.getElementById("g").innerText=c;
+}
 
 /* CRYPTO */
 function encode(t){return btoa(unescape(encodeURIComponent(t)))}
