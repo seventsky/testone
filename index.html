@@ -5,45 +5,12 @@
 <title>Seven OS v24.5</title>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-
 body{
 margin:0;
-font-family:'Share Tech Mono', monospace;
-background:radial-gradient(circle at center,#020202 0%,#000 100%);
-color:#8affc1;
+font-family:Segoe UI, Arial, sans-serif;
+background:#0e1116;
+color:#d1d5db;
 overflow:hidden;
-}
-
-/* SCANLINES */
-body::before{
-content:"";
-position:fixed;
-inset:0;
-background:repeating-linear-gradient(
-to bottom,
-rgba(0,255,150,0.03),
-rgba(0,255,150,0.03) 1px,
-transparent 1px,
-transparent 3px
-);
-pointer-events:none;
-}
-
-/* LOGIN */
-#login{
-position:fixed;
-inset:0;
-display:flex;
-align-items:center;
-justify-content:center;
-background:#000;
-font-size:22px;
-cursor:pointer;
-z-index:99999;
-letter-spacing:2px;
-color:#00ff9f;
-text-shadow:0 0 10px rgba(0,255,150,0.5);
 }
 
 /* DESKTOP */
@@ -52,30 +19,21 @@ position:absolute;
 inset:0 0 48px 0;
 display:grid;
 grid-template-columns:repeat(auto-fill,90px);
-gap:14px;
-padding:20px;
-align-content:start;
+gap:10px;
+padding:15px;
 }
 
-/* ICONS */
+/* ICON */
 .icon{
 width:80px;
-height:80px;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-border-radius:8px;
+text-align:center;
 cursor:pointer;
-transition:.2s;
-user-select:none;
-color:#6ee7b7;
+color:#ccc;
+font-size:12px;
 }
 
 .icon:hover{
-background:rgba(0,255,150,0.1);
-transform:scale(1.08);
-box-shadow:0 0 10px rgba(0,255,150,0.2);
+background:rgba(255,255,255,0.05);
 }
 
 /* TASKBAR */
@@ -85,14 +43,26 @@ bottom:0;
 left:0;
 right:0;
 height:48px;
-background:#05080c;
-border-top:1px solid rgba(0,255,150,0.1);
+background:#181c22;
 display:flex;
 align-items:center;
-padding:0 10px;
-backdrop-filter:blur(6px);
+padding:0 8px;
+border-top:1px solid #2a2f36;
 }
 
+/* START */
+.start{
+width:40px;
+height:40px;
+background:#222;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:4px;
+cursor:pointer;
+}
+
+/* TASKS */
 .tasks{
 display:flex;
 gap:6px;
@@ -100,50 +70,53 @@ margin-left:10px;
 }
 
 .task{
-padding:6px 10px;
-border-radius:6px;
+padding:6px 12px;
+background:#222;
+border-radius:4px;
 cursor:pointer;
-background:#0c1116;
-border:1px solid rgba(0,255,150,0.1);
-transition:.2s;
+font-size:12px;
 }
 
 .task.active{
-background:#00ff9f22;
-box-shadow:0 0 8px rgba(0,255,150,0.4);
+background:#3a3f46;
 }
 
+/* CLOCK */
 #clock{
 margin-left:auto;
-color:#00ff9f;
+font-size:12px;
 }
 
-/* WINDOWS */
+/* WINDOW */
 .window{
 position:absolute;
 width:520px;
 height:340px;
-background:rgba(5,10,15,0.95);
-border:1px solid rgba(0,255,150,0.25);
-border-radius:10px;
+background:#1f2329;
+border:1px solid #2f343b;
+border-radius:6px;
 display:none;
 flex-direction:column;
-resize:both;
-overflow:hidden;
-box-shadow:0 0 25px rgba(0,255,150,0.15);
+box-shadow:0 15px 40px rgba(0,0,0,0.7);
 }
 
 /* TITLEBAR */
 .titlebar{
-background:linear-gradient(90deg,#05080c,#0a0f14);
+background:#2a2f36;
 padding:6px;
 display:flex;
 justify-content:space-between;
 cursor:move;
-user-select:none;
-color:#00ff9f;
 font-size:13px;
-border-bottom:1px solid rgba(0,255,150,0.15);
+}
+
+.titlebar span{
+cursor:pointer;
+padding:0 6px;
+}
+
+.titlebar span:hover{
+color:#fff;
 }
 
 /* CONTENT */
@@ -153,76 +126,51 @@ padding:10px;
 overflow:auto;
 }
 
-/* INPUTS */
+/* INPUT */
 button,input,textarea{
-background:#000;
-color:#00ff9f;
-border:1px solid rgba(0,255,150,0.2);
+background:#111;
+color:#ddd;
+border:1px solid #333;
 padding:6px;
 width:100%;
 margin-bottom:5px;
-font-family:'Share Tech Mono', monospace;
 }
 
-button:hover{
-background:rgba(0,255,150,0.1);
-cursor:pointer;
-}
-
-/* EXTRA DETAIL */
-#desktop::after{
-content:"user: unknown";
-position:absolute;
-bottom:60px;
-right:20px;
-font-size:10px;
-color:#00ff9f55;
-letter-spacing:1px;
-}
 </style>
 </head>
 
 <body>
 
-<div id="login" onclick="boot()">✧₊⁺ constelação</div>
-
 <div id="desktop"></div>
 
 <div class="taskbar">
-<div>◼</div>
+<div class="start">◼</div>
 <div class="tasks" id="tasks"></div>
 <div id="clock"></div>
 </div>
 
 <script>
 
-/* ================= CORE ================= */
-
+/* CORE */
 let Z=1;
 let APP_REGISTRY={};
-let FILES=[];
+let FILES={};
+let TASKS={};
 
 /* CLOCK */
 setInterval(()=>{
 clock.innerText=new Date().toLocaleTimeString().slice(0,5);
 },1000);
 
-/* LOGIN */
-function boot(){
-login.style.display="none";
-init();
-}
-
-/* ================= WINDOW ================= */
-
+/* WINDOW */
 function createWindow(app){
 
 let w=document.createElement("div");
 w.className="window";
 w.id=app.id;
 
-w.style.left=(window.innerWidth/2-260)+"px";
-w.style.top=(window.innerHeight/2-170)+"px";
+w.style.left="200px";
+w.style.top="120px";
 
 w.innerHTML=`
 <div class="titlebar">
@@ -239,18 +187,32 @@ document.body.appendChild(w);
 drag(w);
 }
 
-/* ICONS */
+/* ICON */
 function createIcon(app){
 let d=document.createElement("div");
 d.className="icon";
 
 d.innerHTML=`
-<span style="font-size:26px">${app.icon}</span>
-<div style="font-size:11px">${app.title}</div>
+<div style="font-size:26px">${app.icon}</div>
+${app.title}
 `;
 
 d.onclick=()=>openApp(app.id);
 desktop.appendChild(d);
+}
+
+/* TASKBAR APP */
+function addTask(app){
+if(TASKS[app.id]) return;
+
+let t=document.createElement("div");
+t.className="task";
+t.innerText=app.title;
+
+t.onclick=()=>openApp(app.id);
+
+tasks.appendChild(t);
+TASKS[app.id]=t;
 }
 
 /* SYSTEM */
@@ -261,17 +223,30 @@ APP_REGISTRY[app.id]=app;
 /* OPEN */
 function openApp(id){
 let w=document.getElementById(id);
+let app=APP_REGISTRY[id];
+
 if(!w) return;
+
 w.style.display="flex";
 focus(w);
+
+addTask(app);
+
+/* active */
+Object.values(TASKS).forEach(t=>t.classList.remove("active"));
+TASKS[id].classList.add("active");
 }
 
-/* MIN / CLOSE */
+/* MIN */
 function min(id){
 document.getElementById(id).style.display="none";
+TASKS[id].classList.remove("active");
 }
 
-function closeW(id){min(id);}
+/* CLOSE */
+function closeW(id){
+min(id);
+}
 
 /* FOCUS */
 function focus(w){
@@ -279,8 +254,7 @@ Z++;
 w.style.zIndex=Z;
 }
 
-/* ================= DRAG ================= */
-
+/* DRAG */
 function drag(win){
 let bar=win.querySelector(".titlebar");
 let active=false,x=0,y=0;
@@ -302,30 +276,9 @@ win.style.top=(e.clientY-y)+"px";
 document.onmouseup=()=>active=false;
 }
 
-/* ================= INIT ================= */
-
+/* INIT */
 function init(){
 
-FILES=[
-{name:"talvez a verdadeira.log",content:"system active"},
-{name:"melodia seja.dat",content:"constelação layer"},
-{name:"a conversa.sys",content:"locked profile"},
-{name:"entre as estrelas.sec",content:"secure boot active"}
-];
-
-/* FILES */
-registerApp({
-id:"files",
-title:"files.exe",
-icon:"📁",
-content:`
-<h3>FILES SYSTEM</h3>
-${FILES.map(f=>`<div onclick="openFile('${f.name}')">📄 ${f.name}</div>`).join("")}
-<textarea id="fileView"></textarea>
-`
-});
-
-/* NOTES */
 registerApp({
 id:"notes",
 title:"notes.exe",
@@ -333,61 +286,23 @@ icon:"📝",
 content:`<textarea></textarea>`
 });
 
-/* SECRETS */
 registerApp({
 id:"secrets",
 title:"secrets.exe",
 icon:"🔐",
 content:`
 <textarea id="sec"></textarea>
-<button onclick="out.innerText=encode(sec.value)">encode</button>
-<button onclick="out.innerText=decode(sec.value)">decode</button>
+<button onclick="out.innerText=btoa(sec.value)">encode</button>
+<button onclick="out.innerText=atob(sec.value)">decode</button>
 <div id="out"></div>
 `
 });
 
-/* PLAYLIST */
-registerApp({
-id:"playlist",
-title:"playlist.exe",
-icon:"🎧",
-content:`forfun<br>xamã<br>mac miller<br>MGK<br>sleeptoken<br>kehlani`
-});
-
-/* MUSIC */
 registerApp({
 id:"music",
 title:"music.exe",
 icon:"🎵",
-content:`<iframe width="100%" height="180"
-src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>`
-});
-
-/* GAME */
-registerApp({
-id:"game",
-title:"game.exe",
-icon:"🎮",
-content:`<button onclick="add()">click</button><div id="g">0</div>`
-});
-
-/* SEARCH */
-registerApp({
-id:"search",
-title:"search.exe",
-icon:"🔍",
-content:`<input placeholder="search system">`
-});
-
-/* SETTINGS */
-registerApp({
-id:"settings",
-title:"settings.exe",
-icon:"⚙",
-content:`
-<button onclick="document.body.style.background='#000'">dark</button>
-<button onclick="document.body.style.background='#e5e7eb'">light</button>
-`
+content:`<iframe width="100%" height="180" src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>`
 });
 
 /* BUILD */
@@ -398,16 +313,7 @@ createIcon(app);
 
 }
 
-/* GAME */
-let c=0;
-function add(){
-c++;
-document.getElementById("g").innerText=c;
-}
-
-/* CRYPTO */
-function encode(t){return btoa(unescape(encodeURIComponent(t)))}
-function decode(t){try{return decodeURIComponent(escape(atob(t)))}catch(e){return "erro"}}
+init();
 
 </script>
 
