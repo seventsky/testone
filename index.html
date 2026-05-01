@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v25 - Recovered</title>
+<title>Seven OS v29 - Recovered</title>
 
 <style>
 body{
@@ -189,6 +189,12 @@ width:40%;
 
 <script>
 
+/* ===== CORREÇÃO CRÍTICA ===== */
+const desktop = document.getElementById("desktop");
+const tasks = document.getElementById("tasks");
+const clock = document.getElementById("clock");
+const login = document.getElementById("login");
+
 /* CORE */
 let Z=1;
 let APP_REGISTRY={};
@@ -345,69 +351,35 @@ FILES=[
 {name:"fragmento_02.enc",content:encode("você encontrou isso cedo demais")}
 ];
 
-/* ===== TODOS OS APPS ORIGINAIS ===== */
-
-registerApp({
-id:"files",
-title:"files.exe",
-icon:"📁",
+/* APPS */
+registerApp({id:"files",title:"files.exe",icon:"📁",
 content:`<h3>FILES SYSTEM</h3>
 ${FILES.map(f=>`<div onclick="openFile('${f.name}')">📄 ${f.name}</div>`).join("")}
-<textarea id="fileView"></textarea>`
-});
+<textarea id="fileView"></textarea>`});
 
-registerApp({
-id:"notes",
-title:"notes.exe",
-icon:"📝",
-content:`<textarea></textarea>`
-});
+registerApp({id:"notes",title:"notes.exe",icon:"📝",content:`<textarea></textarea>`});
 
-registerApp({
-id:"secrets",
-title:"secrets.exe",
-icon:"🔐",
+registerApp({id:"secrets",title:"secrets.exe",icon:"🔐",
 content:`<textarea id="sec"></textarea>
 <button onclick="out.innerText=encode(sec.value)">encode</button>
 <button onclick="out.innerText=decode(sec.value)">decode</button>
-<div id="out"></div>`
-});
+<div id="out"></div>`});
 
-registerApp({
-id:"playlist",
-title:"playlist.exe",
-icon:"🎧",
-content:`forfun<br>xamã<br>mac miller<br>MGK<br>sleeptoken<br>kehlani`
-});
+registerApp({id:"playlist",title:"playlist.exe",icon:"🎧",
+content:`forfun<br>xamã<br>mac miller<br>MGK<br>sleeptoken<br>kehlani`});
 
-registerApp({
-id:"music",
-title:"music.exe",
-icon:"🎵",
-content:`<iframe width="100%" height="180" src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>`
-});
+registerApp({id:"music",title:"music.exe",icon:"🎵",
+content:`<iframe width="100%" height="180" src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>`});
 
-registerApp({
-id:"game",
-title:"game.exe",
-icon:"🎮",
-content:`<button onclick="add()">click</button><div id="g">0</div>`
-});
+registerApp({id:"game",title:"game.exe",icon:"🎮",
+content:`<button onclick="add()">click</button><div id="g">0</div>`});
 
-registerApp({
-id:"search",
-title:"search.exe",
-icon:"🔍",
-content:`<input id="searchInput" placeholder="search system">`
-});
+registerApp({id:"search",title:"search.exe",icon:"🔍",
+content:`<input id="searchInput" placeholder="search system">`});
 
-registerApp({
-id:"settings",
-title:"settings.exe",
-icon:"⚙",
+registerApp({id:"settings",title:"settings.exe",icon:"⚙",
 content:`<button onclick="document.body.style.background='#000'">dark</button>
-<button onclick="document.body.style.background='#e5e7eb'">light</button>`
-});
+<button onclick="document.body.style.background='#e5e7eb'">light</button>`});
 
 /* BUILD */
 Object.values(APP_REGISTRY).forEach(app=>{
@@ -419,10 +391,7 @@ createIcon(app);
 
 /* GAME */
 let c=0;
-function add(){
-c++;
-document.getElementById("g").innerText=c;
-}
+function add(){c++;document.getElementById("g").innerText=c;}
 
 /* CRYPTO */
 function encode(t){return btoa(unescape(encodeURIComponent(t)))}
