@@ -2,41 +2,15 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Seven OS v28</title>
+<title>Seven OS v25</title>
 
 <style>
-
-/* RESET BASE */
 body{
 margin:0;
 font-family:Segoe UI, Arial, sans-serif;
 background:#0e1116;
 color:#d1d5db;
 overflow:hidden;
-}
-
-/* FUNDO */
-body::after{
-content:"";
-position:fixed;
-inset:0;
-background:
-radial-gradient(circle at center, rgba(255,255,255,0.03), transparent 70%);
-pointer-events:none;
-}
-
-/* LOGIN */
-#login{
-position:fixed;
-inset:0;
-display:flex;
-align-items:center;
-justify-content:center;
-background:#0b0f14;
-font-size:20px;
-cursor:pointer;
-z-index:99999;
-color:#aaa;
 }
 
 /* DESKTOP */
@@ -47,27 +21,18 @@ display:grid;
 grid-template-columns:repeat(auto-fill,90px);
 gap:12px;
 padding:20px;
-align-content:start;
 }
 
-/* ICONES */
+/* ICON */
 .icon{
 width:80px;
-height:80px;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-border-radius:6px;
+text-align:center;
 cursor:pointer;
-transition:.15s;
-user-select:none;
-color:#ccc;
 font-size:12px;
 }
 
 .icon:hover{
-background:rgba(255,255,255,0.06);
+background:rgba(255,255,255,0.05);
 }
 
 /* TASKBAR */
@@ -78,20 +43,16 @@ left:0;
 right:0;
 height:48px;
 background:#181c22;
-border-top:1px solid #2a2f36;
 display:flex;
 align-items:center;
 padding:0 10px;
+border-top:1px solid #2a2f36;
 }
 
 /* START */
-.taskbar > div:first-child{
-width:36px;
-height:36px;
-display:flex;
-align-items:center;
-justify-content:center;
+.start{
 background:#232830;
+padding:6px 12px;
 border-radius:4px;
 cursor:pointer;
 }
@@ -105,10 +66,9 @@ margin-left:10px;
 
 .task{
 padding:6px 10px;
+background:#232830;
 border-radius:4px;
 cursor:pointer;
-background:#232830;
-border:1px solid #2f343b;
 font-size:12px;
 }
 
@@ -116,14 +76,15 @@ font-size:12px;
 background:#3a3f46;
 }
 
-/* CLOCK */
-#clock{
+/* TRAY */
+.tray{
 margin-left:auto;
+display:flex;
+gap:10px;
 font-size:12px;
-color:#aaa;
 }
 
-/* WINDOWS */
+/* WINDOW */
 .window{
 position:absolute;
 width:520px;
@@ -135,29 +96,15 @@ display:none;
 flex-direction:column;
 resize:both;
 overflow:hidden;
-box-shadow:0 15px 40px rgba(0,0,0,0.7);
 }
 
-/* TITLEBAR */
+/* TITLE */
 .titlebar{
 background:#2a2f36;
-padding:6px 8px;
+padding:6px;
 display:flex;
 justify-content:space-between;
 cursor:move;
-user-select:none;
-font-size:13px;
-border-bottom:1px solid #2f343b;
-}
-
-.titlebar span{
-padding:0 6px;
-cursor:pointer;
-color:#aaa;
-}
-
-.titlebar span:hover{
-color:#fff;
 }
 
 /* CONTENT */
@@ -165,10 +112,9 @@ color:#fff;
 flex:1;
 padding:10px;
 overflow:auto;
-font-size:13px;
 }
 
-/* INPUTS */
+/* INPUT */
 button,input,textarea{
 background:#111;
 color:#ddd;
@@ -176,23 +122,44 @@ border:1px solid #333;
 padding:6px;
 width:100%;
 margin-bottom:5px;
-font-family:inherit;
-font-size:13px;
 }
 
-button:hover{
-background:#222;
-cursor:pointer;
-}
+/* ===== WIDGETS ===== */
 
-/* DETALHE */
-#desktop::after{
-content:"last session: unknown user";
+.widget{
 position:absolute;
-bottom:60px;
+background:rgba(20,25,30,0.7);
+border:1px solid #2a2f36;
+padding:10px;
+border-radius:8px;
+font-size:12px;
+}
+
+#widget-clock{
+top:20px;
 right:20px;
-font-size:10px;
-color:#444;
+font-size:26px;
+text-align:right;
+}
+
+#widget-system{
+bottom:80px;
+left:20px;
+width:180px;
+}
+
+.bar{
+height:6px;
+background:#333;
+border-radius:4px;
+overflow:hidden;
+margin-top:4px;
+}
+
+.bar-fill{
+height:100%;
+background:#4ade80;
+width:40%;
 }
 
 </style>
@@ -204,19 +171,35 @@ color:#444;
 
 <div id="desktop"></div>
 
+<!-- WIDGETS -->
+<div class="widget" id="widget-clock"></div>
+
+<div class="widget" id="widget-system">
+<div>System Status</div>
+<div>CPU</div>
+<div class="bar"><div class="bar-fill" id="cpuBar"></div></div>
+<div style="margin-top:6px;">Memory: Stable</div>
+<div>Network: Connected</div>
+</div>
+
+<!-- TASKBAR -->
 <div class="taskbar">
-<div>◼</div>
+<div class="start">◼ Start</div>
 <div class="tasks" id="tasks"></div>
-<div id="clock"></div>
+<div class="tray">
+<span>📶</span>
+<span>🔋</span>
+<span id="clock"></span>
+</div>
 </div>
 
 <script>
 
-/* ================= CORE ================= */
-
+/* CORE */
 let Z=1;
 let APP_REGISTRY={};
 let FILES=[];
+let TASKS={};
 
 /* CLOCK */
 setInterval(()=>{
@@ -229,16 +212,14 @@ login.style.display="none";
 init();
 }
 
-/* ================= WINDOW ================= */
-
+/* WINDOW */
 function createWindow(app){
-
 let w=document.createElement("div");
 w.className="window";
 w.id=app.id;
 
-w.style.left=(window.innerWidth/2-260)+"px";
-w.style.top=(window.innerHeight/2-170)+"px";
+w.style.left="200px";
+w.style.top="120px";
 
 w.innerHTML=`
 <div class="titlebar">
@@ -255,18 +236,32 @@ document.body.appendChild(w);
 drag(w);
 }
 
-/* ICONS */
+/* ICON */
 function createIcon(app){
 let d=document.createElement("div");
 d.className="icon";
 
 d.innerHTML=`
-<span style="font-size:26px">${app.icon}</span>
-<div style="font-size:11px">${app.title}</div>
+<div style="font-size:26px">${app.icon}</div>
+${app.title}
 `;
 
 d.onclick=()=>openApp(app.id);
 desktop.appendChild(d);
+}
+
+/* TASKBAR APP */
+function addTask(app){
+if(TASKS[app.id]) return;
+
+let t=document.createElement("div");
+t.className="task";
+t.innerText=app.title;
+
+t.onclick=()=>openApp(app.id);
+
+tasks.appendChild(t);
+TASKS[app.id]=t;
 }
 
 /* SYSTEM */
@@ -277,14 +272,23 @@ APP_REGISTRY[app.id]=app;
 /* OPEN */
 function openApp(id){
 let w=document.getElementById(id);
+let app=APP_REGISTRY[id];
+
 if(!w) return;
+
 w.style.display="flex";
 focus(w);
+
+addTask(app);
+
+Object.values(TASKS).forEach(t=>t.classList.remove("active"));
+TASKS[id].classList.add("active");
 }
 
-/* MIN / CLOSE */
+/* MIN/CLOSE */
 function min(id){
 document.getElementById(id).style.display="none";
+if(TASKS[id]) TASKS[id].classList.remove("active");
 }
 
 function closeW(id){min(id);}
@@ -295,8 +299,7 @@ Z++;
 w.style.zIndex=Z;
 }
 
-/* ================= DRAG ================= */
-
+/* DRAG */
 function drag(win){
 let bar=win.querySelector(".titlebar");
 let active=false,x=0,y=0;
@@ -318,8 +321,7 @@ win.style.top=(e.clientY-y)+"px";
 document.onmouseup=()=>active=false;
 }
 
-/* ================= INIT ================= */
-
+/* INIT */
 function init(){
 
 FILES=[
@@ -424,6 +426,21 @@ document.getElementById("g").innerText=c;
 /* CRYPTO */
 function encode(t){return btoa(unescape(encodeURIComponent(t)))}
 function decode(t){try{return decodeURIComponent(escape(atob(t)))}catch(e){return "erro"}}
+
+/* WIDGETS */
+
+// relógio grande
+setInterval(()=>{
+let now=new Date();
+document.getElementById("widget-clock").innerHTML=
+now.toLocaleTimeString().slice(0,5)+"<br><span style='font-size:12px'>"+now.toLocaleDateString()+"</span>";
+},1000);
+
+// cpu fake
+setInterval(()=>{
+let v=Math.floor(Math.random()*100);
+document.getElementById("cpuBar").style.width=v+"%";
+},1500);
 
 </script>
 
